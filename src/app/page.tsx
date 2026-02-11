@@ -213,12 +213,7 @@ export default function HomePage() {
             <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">PROJECT</p>
             <h3 className="mt-3 text-3xl font-bold text-muruk-green-darker sm:text-4xl">프로젝트</h3>
             <p className="mt-2 text-base text-muruk-green-dark">총 {projects.length}개의 프로젝트를 진행했습니다.</p>
-            <p className="mt-6 text-lg leading-relaxed text-muruk-green-text/90">
-              {projectsQuery.isLoading
-                ? '프로젝트 정보를 불러오는 중입니다.'
-                : featuredProject?.description ??
-                  '아이디어를 실제 서비스로 구현하며, 팀 협업과 문제 해결 경험을 쌓아갑니다.'}
-            </p>
+            <p className="mt-6 text-lg leading-relaxed text-muruk-green-text/90">서사 입력 예정.</p>
             <div className="mt-8">
               <Link
                 href="/projects"
@@ -243,13 +238,7 @@ export default function HomePage() {
             <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">ACHIEVEMENT</p>
             <h3 className="mt-3 text-3xl font-bold text-muruk-green-darker sm:text-4xl">업적</h3>
             <p className="mt-2 text-base text-muruk-green-dark">총 {achievements.length}건의 업적이 있습니다.</p>
-            <p className="mt-6 text-lg leading-relaxed text-muruk-green-text/90">
-              {achievementsQuery.isLoading
-                ? '수상 정보를 불러오는 중입니다.'
-                : featuredAchievement
-                  ? `${featuredAchievement.name}${featuredAchievement.award ? ` · ${featuredAchievement.award}` : ''}`
-                  : '다양한 해커톤과 공모전에서 팀의 결과물을 인정받고 있습니다.'}
-            </p>
+            <p className="mt-6 text-lg leading-relaxed text-muruk-green-text/90">서사 입력 예정.</p>
             <div className="mt-8">
               <Link
                 href="/achievements"
