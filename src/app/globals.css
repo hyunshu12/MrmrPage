@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import "tailwindcss";
+
+@config '../../tailwind.config.ts';
+
+:root {
+  /* 무럭무럭 Green Palette */
+  --color-cream: #fffbe2;
+  --color-cream-light: #fffde3;
+  --color-cream-dark: #fff9d2;
+  --color-green-lightest: #e5f0c0;
+  --color-green-light: #a0c9a2;
+  --color-green-medium: #9cb67c;
+  --color-green-sage: #90a470;
+  --color-green-primary: #688a46;
+  --color-green-dark: #62783e;
+  --color-green-darker: #51662f;
+  --color-green-deepest: #394e25;
+  --color-green-text: #4a5a35;
+  --color-green-muted: #7a9a70;
+  --color-green-award: #4d6f2c;
+  --color-green-border: #72805c;
+  --color-card-bg: #fdfaf0;
+  --color-card-light: #fffff8;
+  --color-nav-inactive: #a1a1a1;
+
+  --radius-card: 2rem;
+  --radius-button: 1.875rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: 'Crimson Text', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Long-list performance: defer off-screen layout/paint (Vercel React best practices) */
+.content-visibility-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 280px;
+}
+
+/* Page gradient backgrounds */
+.bg-gradient-home {
+  background: linear-gradient(to bottom, #fffbe2 0%, #e5f0c0 50%, #a0c9a2 100%);
+}
+
+.bg-gradient-projects {
+  background: linear-gradient(to bottom, #fffde3 0%, rgba(156, 182, 124, 0.86) 100%);
+}
+
+.bg-gradient-members {
+  background: linear-gradient(to bottom, #fff9d2 0%, #e5f0c0 50%, #a0c9a2 100%);
+}
+
+.bg-gradient-achievements {
+  background: linear-gradient(to bottom, #fffbe2 0%, #e5f0c0 50%, #a0c9a2 100%);
+}
+
+/* Motion system */
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes driftX {
+  0% {
+    transform: translateX(-6px);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+  100% {
+    transform: translateX(-6px);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shineSweep {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(160%);
+  }
+}
+
+.float-slow {
+  animation: floatY 8s ease-in-out infinite;
+}
+
+.float-slower {
+  animation: floatY 11s ease-in-out infinite;
+}
+
+.drift-slow {
+  animation: driftX 9s ease-in-out infinite;
+}
+
+.reveal-up {
+  opacity: 0;
+  animation: fadeUp 700ms ease-out forwards;
+}
+
+.delay-1 {
+  animation-delay: 120ms;
+}
+
+.delay-2 {
+  animation-delay: 240ms;
+}
+
+.delay-3 {
+  animation-delay: 360ms;
+}
+
+.divider-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.divider-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shineSweep 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes ctaFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    box-shadow: 0 8px 24px rgba(81, 102, 47, 0.12);
+  }
+  50% {
+    box-shadow: 0 12px 32px rgba(81, 102, 47, 0.2);
+  }
+}
+
+.cta-float {
+  animation: ctaFloat 3.8s ease-in-out infinite, ctaPulse 4.2s ease-in-out infinite;
+  backdrop-filter: blur(8px);
+}
+
+.kakao-shortcut {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9999px;
+  border: 1px solid rgba(114, 128, 92, 0.4);
+  background: rgba(255, 255, 255, 0.8);
+  color: #394e25;
+  transition:
+    transform 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    background-color 240ms ease;
+  backdrop-filter: blur(6px);
+}
+
+.kakao-shortcut::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-102%);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0));
+  transition: transform 520ms ease;
+}
+
+.kakao-shortcut:hover {
+  transform: translateY(-2px);
+  border-color: rgba(81, 102, 47, 0.5);
+  box-shadow: 0 10px 24px rgba(81, 102, 47, 0.15);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.kakao-shortcut:hover::before {
+  transform: translateX(102%);
+}
+
+.kakao-shortcut-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  background: rgba(81, 102, 47, 0.1);
+  transition: transform 220ms ease, background-color 220ms ease;
+}
+
+.kakao-shortcut:hover .kakao-shortcut-arrow {
+  transform: translateX(2px);
+  background: rgba(81, 102, 47, 0.18);
+}
