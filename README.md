@@ -141,6 +141,48 @@ src/
   types/
 ```
 
+## 배포 (Vercel)
+
+### 1) GitHub에 코드 푸시
+
+이 저장소를 GitHub(예: `hyunshu12/MrmrPage`)에 푸시해 두세요.
+
+### 2) Vercel에서 프로젝트 Import
+
+1. [vercel.com](https://vercel.com) 로그인 후 **Add New → Project**
+2. **Import Git Repository**에서 해당 GitHub 저장소 선택
+3. **Framework Preset**: Next.js (자동 감지)
+4. **Build Command**: `bun run build` (또는 `vercel.json` 기본값 사용)
+5. **Install Command**: `bun install`
+
+### 3) 환경변수 설정
+
+Vercel 프로젝트 **Settings → Environment Variables**에서 **Production**에 아래 4개 추가:
+
+| Name | Value |
+|------|--------|
+| `NOTION_TOKEN` | Notion Integration Token |
+| `NOTION_MEMBERS_DB_ID` | Members DB ID |
+| `NOTION_PROJECTS_DB_ID` | Projects DB ID |
+| `NOTION_ACHIEVEMENTS_DB_ID` | Achievements DB ID |
+
+### 4) Deploy
+
+**Deploy** 버튼으로 배포 후, `*.vercel.app` URL에서 확인합니다.  
+커스텀 도메인은 **Settings → Domains**에서 연결할 수 있습니다.
+
+### CLI로 배포
+
+로컬에서 한 번에 배포하려면:
+
+```bash
+npx vercel --prod
+```
+
+최초 실행 시 로그인·프로젝트 연결 안내가 나옵니다. 환경변수는 Vercel 대시보드에서 미리 넣어 두거나, `vercel env add`로 추가할 수 있습니다.
+
+---
+
 ## Docker
 
 ```bash
