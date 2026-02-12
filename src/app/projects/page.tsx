@@ -155,6 +155,8 @@ export default function ProjectsPage() {
           fill
           className="scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           priority
         />

@@ -128,6 +128,8 @@ export default function MembersPage() {
           alt="멤버 소개 대표 이미지"
           fill
           className="object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           priority
         />

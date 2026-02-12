@@ -7,6 +7,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 
+const HERO_IMAGE_URLS = ['/memberImage.png', '/projectImage.png', '/archiveImage.png'] as const;
+
 function uniqueNonEmpty(urls: Array<string | null | undefined>): string[] {
   return Array.from(new Set(urls.filter((u): u is string => typeof u === 'string' && u.length > 0)));
 }
@@ -45,6 +47,11 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
 
     async function run() {
       try {
+        // Keep hero images warm in cache so route transitions feel instant.
+        await preloadImages([...HERO_IMAGE_URLS], () => {
+          if (cancelled) return;
+        });
+
         const [members, projects, achievements] = await Promise.all([
           queryClient.fetchQuery<Member[]>({ queryKey: membersQueryKey, queryFn: fetchMembers }),
           queryClient.fetchQuery<Project[]>({ queryKey: projectsQueryKey, queryFn: fetchProjects }),

@@ -154,6 +154,8 @@ export default function AchievementsPage() {
           alt="업적 소개 대표 이미지"
           fill
           className="object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
           sizes="100vw"
           priority
         />
