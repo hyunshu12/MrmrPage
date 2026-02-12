@@ -66,7 +66,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
   return (
     <div className="space-y-10">
       {/* 기수 탭 */}
-      <div className="flex gap-3 overflow-x-auto pb-2">
+      <div className="flex flex-wrap gap-3 pb-2">
         {murukKeys.map((key) => {
           const isActive = key === selectedKey;
           return (
@@ -74,10 +74,10 @@ export default function MembersTabs({ members }: { members: Member[] }) {
               key={key}
               type="button"
               onClick={() => setSelectedKey(key)}
-              className={`whitespace-nowrap rounded-btn border px-5 py-2.5 text-base font-semibold transition-all ${
+              className={`whitespace-nowrap rounded-btn border px-5 py-2.5 text-base font-semibold transition-all duration-300 ease-out ${
                 isActive
-                  ? 'border-muruk-green-border bg-muruk-green-sage text-white shadow-sm'
-                  : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:bg-muruk-green-sage/20'
+                  ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
+                  : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
               }`}
             >
               {key}
@@ -87,7 +87,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
       </div>
 
       {/* 멤버 카드 그리드 */}
-      <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div key={selectedKey} className="reveal-up grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {selectedMembers.map((member) => {
           const lineColor = getRoleColor(member.role);
           const avatarPosition = normalizeAvatarPosition(member.avatarPosition);
@@ -134,7 +134,9 @@ export default function MembersTabs({ members }: { members: Member[] }) {
                     </p>
                   )}
                   {member.statusMessage && (
-                    <p className="text-gray-500">{member.statusMessage}</p>
+                    <p className="break-words whitespace-pre-line leading-relaxed text-gray-500">
+                      {member.statusMessage}
+                    </p>
                   )}
                 </div>
               </div>

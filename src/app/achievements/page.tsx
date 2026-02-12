@@ -67,6 +67,8 @@ export default function AchievementsPage() {
     const handleWheel = (event: WheelEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest('a, button, input, textarea, select')) return;
+      // 자연스러운 사용성을 위해 히어로 섹션에서만 스냅 전환을 사용한다.
+      if (findClosestSection() > 0) return;
       if (Math.abs(event.deltaY) < 1.5) return;
       if (lockRef.current) {
         event.preventDefault();
@@ -106,6 +108,8 @@ export default function AchievementsPage() {
 
     const handleKeydown = (event: KeyboardEvent) => {
       if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(event.key)) return;
+      // 콘텐츠 섹션에서는 기본 키 스크롤을 유지한다.
+      if (findClosestSection() > 0) return;
       if (lockRef.current) {
         event.preventDefault();
         return;
@@ -173,7 +177,7 @@ export default function AchievementsPage() {
       >
         {/* 연도 탭 */}
         {yearKeys.length > 0 && (
-          <div className="mb-12 flex gap-3 overflow-x-auto pb-2">
+          <div className="mb-12 flex flex-wrap gap-3 pb-2">
             {yearKeys.map((year) => {
               const isActive = year === activeYear;
               return (
@@ -181,10 +185,10 @@ export default function AchievementsPage() {
                   key={year}
                   type="button"
                   onClick={() => setSelectedYear(year)}
-                  className={`whitespace-nowrap rounded-btn border px-5 py-2.5 text-base font-semibold transition-all ${
+                  className={`whitespace-nowrap rounded-btn border px-5 py-2.5 text-base font-semibold transition-all duration-300 ease-out ${
                     isActive
-                      ? 'border-muruk-green-border bg-muruk-green-sage text-white shadow-sm'
-                      : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:bg-muruk-green-sage/20'
+                      ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
+                      : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
                   }`}
                 >
                   {year}
@@ -215,7 +219,7 @@ export default function AchievementsPage() {
 
         {/* 업적 카드 그리드 */}
         {filteredAchievements.length > 0 && (
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div key={activeYear ?? 'all'} className="reveal-up grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
             {filteredAchievements.map((achievement) => (
               <div
                 key={achievement.id}

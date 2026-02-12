@@ -6,16 +6,20 @@ import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoint
 type NotionProperties = PageObjectResponse['properties'];
 type PropertyValue = NotionProperties[string];
 
+function joinPlainText(items: Array<{ plain_text: string }>): string {
+  return items.map((item) => item.plain_text).join('');
+}
+
 function getTitleText(prop: PropertyValue | undefined): string {
   if (prop?.type === 'title' && prop.title.length > 0) {
-    return prop.title[0].plain_text;
+    return joinPlainText(prop.title);
   }
   return '';
 }
 
 function getRichText(prop: PropertyValue | undefined): string | null {
   if (prop?.type === 'rich_text' && prop.rich_text.length > 0) {
-    return prop.rich_text[0].plain_text;
+    return joinPlainText(prop.rich_text);
   }
   return null;
 }
@@ -23,13 +27,13 @@ function getRichText(prop: PropertyValue | undefined): string | null {
 function getTextLike(prop: PropertyValue | undefined): string | null {
   if (!prop) return null;
   if (prop.type === 'rich_text' && prop.rich_text.length > 0) {
-    return prop.rich_text[0].plain_text;
+    return joinPlainText(prop.rich_text);
   }
   if (prop.type === 'select' && prop.select) {
     return prop.select.name;
   }
   if (prop.type === 'title' && prop.title.length > 0) {
-    return prop.title[0].plain_text;
+    return joinPlainText(prop.title);
   }
   if (prop.type === 'formula' && prop.formula.type === 'string') {
     return prop.formula.string;

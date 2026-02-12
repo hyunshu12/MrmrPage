@@ -2,6 +2,7 @@
 
 import nextDynamic from 'next/dynamic';
 import { useMembers } from '@/hooks/useApi';
+import Image from 'next/image';
 
 const MembersTabs = nextDynamic(() => import('@/components/members/MembersTabs.client'), {
   ssr: true,
@@ -41,6 +42,8 @@ export default function MembersPage() {
     const handleWheel = (event: WheelEvent) => {
       const target = event.target as HTMLElement | null;
       if (target?.closest('a, button, input, textarea, select')) return;
+      // 자연스러운 사용성을 위해 히어로 섹션에서만 스냅 전환을 사용한다.
+      if (findClosestSection() > 0) return;
       if (Math.abs(event.deltaY) < 1.5) return;
       if (lockRef.current) {
         event.preventDefault();
@@ -80,6 +83,8 @@ export default function MembersPage() {
 
     const handleKeydown = (event: KeyboardEvent) => {
       if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(event.key)) return;
+      // 콘텐츠 섹션에서는 기본 키 스크롤을 유지한다.
+      if (findClosestSection() > 0) return;
       if (lockRef.current) {
         event.preventDefault();
         return;
@@ -116,21 +121,30 @@ export default function MembersPage() {
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative flex h-screen flex-col items-center justify-center px-4 text-center"
+        className="relative h-screen overflow-hidden"
       >
-        <div className="float-slower pointer-events-none absolute left-[10%] top-[20%] h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
-        <div className="drift-slow pointer-events-none absolute right-[8%] top-[30%] h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
-        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">MEMBERS</p>
-        <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-muruk-green-darker sm:text-5xl">
-          함께하는 멤버들
-        </h1>
-        <p className="reveal-up delay-2 mx-auto mt-4 max-w-2xl text-lg text-muruk-green-text/85">
-          기획, 디자인, 개발이 함께 모여 더 나은 결과를 만듭니다.
-        </p>
+        <Image
+          src="/memberImage.png"
+          alt="멤버 소개 대표 이미지"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          priority
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/55" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+          <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">MEMBERS</p>
+          <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-white drop-shadow-md sm:text-5xl">
+            함께하는 멤버들
+          </h1>
+          <p className="reveal-up delay-2 mx-auto mt-4 max-w-2xl text-lg text-white/90">
+            기획, 디자인, 개발이 함께 모여 더 나은 결과를 만듭니다.
+          </p>
+        </div>
         <a
           href="#members-content"
           aria-label="멤버 소개 내용으로 이동"
-          className="absolute bottom-10 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80"
+          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90"
         >
           <svg className="mx-auto h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

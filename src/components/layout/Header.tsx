@@ -15,23 +15,43 @@ const navItems = [
 
 export default function Header() {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
+  const isMembersPage = pathname === '/members';
+  const [hasPassedMembersHero, setHasPassedMembersHero] = useState(false);
+  const isMembersHeroZone = isMembersPage && !hasPassedMembersHero;
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    if (!isMembersPage) {
+      setHasPassedMembersHero(false);
+      return;
+    }
+
+    const updateState = () => {
+      const heroBottomOffset = window.innerHeight - 120;
+      setHasPassedMembersHero(window.scrollY > heroBottomOffset);
     };
-    handleScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+
+    updateState();
+    window.addEventListener('scroll', updateState, { passive: true });
+    window.addEventListener('resize', updateState);
+    return () => {
+      window.removeEventListener('scroll', updateState);
+      window.removeEventListener('resize', updateState);
+    };
+  }, [isMembersPage]);
+
+  const activeLinkClass = isMembersHeroZone
+    ? 'text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]'
+    : 'text-muruk-green-darker';
+  const inactiveLinkClass = isMembersHeroZone
+    ? 'text-white/85 hover:text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]'
+    : 'text-muruk-green-text/70 hover:text-muruk-green-darker';
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? 'bg-muruk-cream/60 backdrop-blur-md shadow-sm'
-          : 'bg-transparent'
+      className={`fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md transition-all ${
+        isMembersHeroZone
+          ? 'border-white/1 bg-white/1 shadow-[0_8px_22px_rgba(0,0,0,0.14)]'
+          : 'border-white/45 bg-white/32 shadow-[0_10px_24px_rgba(0,0,0,0.08)]'
       }`}
     >
       <nav className="mx-auto flex max-w-[1920px] items-center justify-between px-10 py-4 sm:px-16">
@@ -42,7 +62,7 @@ export default function Header() {
             alt="무럭무럭 로고"
             width={48}
             height={48}
-            className="h-12 w-12 object-contain"
+            className={`h-12 w-12 object-contain ${isMembersHeroZone ? 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]' : ''}`}
             priority
           />
         </Link>
@@ -56,9 +76,7 @@ export default function Header() {
                 <Link
                   href={item.href}
                   className={`text-base font-semibold transition-colors sm:text-lg ${
-                    isActive
-                      ? 'text-muruk-green-darker'
-                      : 'text-muruk-green-text/50 hover:text-muruk-green-darker'
+                    isActive ? activeLinkClass : inactiveLinkClass
                   }`}
                 >
                   {item.label}
