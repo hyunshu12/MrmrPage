@@ -4,8 +4,6 @@ import { useAchievements } from '@/hooks/useApi';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-export const dynamic = 'force-dynamic';
-
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
   if (!match) return null;

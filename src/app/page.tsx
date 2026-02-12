@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { useAchievements, useProjects } from '@/hooks/useApi';
 import { useEffect, useRef } from 'react';
 
-export const dynamic = 'force-dynamic';
-
 export default function HomePage() {
   const projectsQuery = useProjects();
   const achievementsQuery = useAchievements();

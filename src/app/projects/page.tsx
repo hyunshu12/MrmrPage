@@ -3,8 +3,7 @@
 import { useProjects } from '@/hooks/useApi';
 import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-
-export const dynamic = 'force-dynamic';
+import projectHeroImage from '../../../public/projectImage.png';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -150,13 +149,12 @@ export default function ProjectsPage() {
         className="relative h-screen overflow-hidden"
       >
         <Image
-          src="/projectImage.png"
+          src={projectHeroImage}
           alt="프로젝트 소개 대표 이미지"
           fill
           className="scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
-          loading="eager"
-          fetchPriority="high"
+          placeholder="blur"
           sizes="100vw"
           priority
         />

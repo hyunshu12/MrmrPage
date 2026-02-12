@@ -10,8 +10,6 @@ const MembersTabs = nextDynamic(() => import('@/components/members/MembersTabs.c
 });
 import { useEffect, useRef } from 'react';
 
-export const dynamic = 'force-dynamic';
-
 export default function MembersPage() {
   const membersQuery = useMembers();
   const members = membersQuery.data ?? [];
