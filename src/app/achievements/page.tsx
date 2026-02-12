@@ -1,6 +1,7 @@
 'use client';
 
 import { useAchievements } from '@/hooks/useApi';
+import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 export const dynamic = 'force-dynamic';
@@ -146,21 +147,32 @@ export default function AchievementsPage() {
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative flex h-screen flex-col items-center justify-center px-4 text-center"
+        className="relative h-screen overflow-hidden"
       >
-        <div className="float-slower pointer-events-none absolute left-[10%] top-[20%] h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
-        <div className="drift-slow pointer-events-none absolute right-[8%] top-[30%] h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
-        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">ACHIEVEMENT</p>
-        <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-muruk-green-darker sm:text-5xl">
-          동아리의 업적
-        </h1>
-        <p className="reveal-up delay-2 mx-auto mt-4 max-w-2xl text-lg text-muruk-green-text/85">
-          도전의 과정에서 만들어낸 결과와 성장을 기록합니다.
-        </p>
+        <Image
+          src="/archiveImage.png"
+          alt="업적 소개 대표 이미지"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          priority
+        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+          <div className="rounded-2xl bg-black/18 px-8 py-6 backdrop-blur-[2px]">
+            <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">ACHIEVEMENT</p>
+            <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)] sm:text-5xl">
+              동아리의 업적
+            </h1>
+            <p className="reveal-up delay-2 mx-auto mt-4 max-w-xl text-lg leading-relaxed text-white/92">
+              도전의 과정에서 만들어낸 결과와 성장을 기록합니다.
+            </p>
+          </div>
+        </div>
         <a
           href="#achievements-content"
           aria-label="업적 내용으로 이동"
-          className="absolute bottom-10 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80"
+          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90"
         >
           <svg className="mx-auto h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />

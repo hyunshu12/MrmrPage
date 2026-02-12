@@ -15,7 +15,7 @@ const navItems = [
 
 export default function Header() {
   const pathname = usePathname();
-  const isHeroOverlayPage = pathname === '/members' || pathname === '/projects';
+  const isHeroOverlayPage = pathname === '/members' || pathname === '/projects' || pathname === '/achievements';
   const [hasPassedHero, setHasPassedHero] = useState(false);
   const isHeroZone = isHeroOverlayPage && !hasPassedHero;
 
