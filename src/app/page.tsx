@@ -195,7 +195,7 @@ export default function HomePage() {
         <article className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-14">
           <div className="group relative overflow-hidden rounded-card bg-muruk-card-bg shadow-md">
             {projectsQuery.isLoading ? (
-              <div className="aspect-[16/10] animate-pulse bg-muruk-green-lightest/40" />
+              <div className="aspect-[16/10]" />
             ) : featuredProject?.logoUrl ? (
               <img
                 src={featuredProject.logoUrl}
@@ -213,10 +213,15 @@ export default function HomePage() {
           <div className="reveal-up">
             <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">PROJECT</p>
             <h3 className="mt-3 text-3xl font-bold text-muruk-green-darker sm:text-4xl">프로젝트</h3>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-muruk-green-text/90 sm:text-lg sm:leading-relaxed">
-            무럭무럭은 스마트팜을 기반으로 한 {projects.length}개의 프로젝트를 진행하며 농업이 마주한 여러 사회적 문제에 주목해왔습니다. 
-            농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의 가치를 일상 속에서 다시 인식할 수 있도록 노력 하였습니다.
-            </p>
+            {projectsQuery.isLoading ? (
+              <div className="mt-6 h-28" />
+            ) : (
+              <p className="mt-6 max-w-2xl text-base leading-8 text-muruk-green-text/90 sm:text-lg sm:leading-relaxed">
+                무럭무럭은 스마트팜을 기반으로 한 {projects.length}개의 프로젝트를 진행하며 농업이 마주한 여러 사회적 문제에
+                주목해왔습니다. 농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의 가치를 일상 속에서 다시 인식할 수 있도록 노력
+                하였습니다.
+              </p>
+            )}
             <div className="mt-8">
               <Link
                 href="/projects"
@@ -259,7 +264,7 @@ export default function HomePage() {
 
           <div className="group order-1 overflow-hidden rounded-card bg-white shadow-md lg:order-2">
             {achievementsQuery.isLoading ? (
-              <div className="aspect-[16/10] animate-pulse bg-muruk-green-lightest/30" />
+              <div className="aspect-[16/10]" />
             ) : featuredAchievement?.thumbnailUrl ? (
               <img
                 src={featuredAchievement.thumbnailUrl}

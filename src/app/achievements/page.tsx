@@ -205,11 +205,6 @@ export default function AchievementsPage() {
           </div>
         )}
 
-        {/* 로딩 */}
-        {achievementsQuery.isLoading && (
-          <p className="text-center text-muruk-green-muted">불러오는 중…</p>
-        )}
-
         {/* 빈 상태 */}
         {achievements.length === 0 && !error && !achievementsQuery.isLoading && (
           <div className="rounded-card bg-muruk-card-bg p-12 text-center text-muruk-green-muted">

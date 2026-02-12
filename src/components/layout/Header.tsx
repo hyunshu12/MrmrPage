@@ -15,19 +15,19 @@ const navItems = [
 
 export default function Header() {
   const pathname = usePathname();
-  const isMembersPage = pathname === '/members';
-  const [hasPassedMembersHero, setHasPassedMembersHero] = useState(false);
-  const isMembersHeroZone = isMembersPage && !hasPassedMembersHero;
+  const isHeroOverlayPage = pathname === '/members' || pathname === '/projects';
+  const [hasPassedHero, setHasPassedHero] = useState(false);
+  const isHeroZone = isHeroOverlayPage && !hasPassedHero;
 
   useEffect(() => {
-    if (!isMembersPage) {
-      setHasPassedMembersHero(false);
+    if (!isHeroOverlayPage) {
+      setHasPassedHero(false);
       return;
     }
 
     const updateState = () => {
       const heroBottomOffset = window.innerHeight - 120;
-      setHasPassedMembersHero(window.scrollY > heroBottomOffset);
+      setHasPassedHero(window.scrollY > heroBottomOffset);
     };
 
     updateState();
@@ -37,19 +37,19 @@ export default function Header() {
       window.removeEventListener('scroll', updateState);
       window.removeEventListener('resize', updateState);
     };
-  }, [isMembersPage]);
+  }, [isHeroOverlayPage]);
 
-  const activeLinkClass = isMembersHeroZone
+  const activeLinkClass = isHeroZone
     ? 'text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]'
     : 'text-muruk-green-darker';
-  const inactiveLinkClass = isMembersHeroZone
+  const inactiveLinkClass = isHeroZone
     ? 'text-white/85 hover:text-white drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]'
     : 'text-muruk-green-text/70 hover:text-muruk-green-darker';
 
   return (
     <header
       className={`fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md transition-all ${
-        isMembersHeroZone
+        isHeroZone
           ? 'border-white/1 bg-white/1 shadow-[0_8px_22px_rgba(0,0,0,0.14)]'
           : 'border-white/45 bg-white/32 shadow-[0_10px_24px_rgba(0,0,0,0.08)]'
       }`}
@@ -62,7 +62,7 @@ export default function Header() {
             alt="무럭무럭 로고"
             width={48}
             height={48}
-            className={`h-12 w-12 object-contain ${isMembersHeroZone ? 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]' : ''}`}
+            className={`h-12 w-12 object-contain ${isHeroZone ? 'drop-shadow-[0_2px_8px_rgba(0,0,0,0.45)]' : ''}`}
             priority
           />
         </Link>

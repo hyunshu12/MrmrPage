@@ -6,7 +6,7 @@ import Image from 'next/image';
 
 const MembersTabs = nextDynamic(() => import('@/components/members/MembersTabs.client'), {
   ssr: true,
-  loading: () => <p className="text-center text-muruk-green-muted">멤버 목록 불러오는 중…</p>,
+  loading: () => null,
 });
 import { useEffect, useRef } from 'react';
 
@@ -131,15 +131,17 @@ export default function MembersPage() {
           sizes="100vw"
           priority
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/20 via-black/35 to-black/55" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-          <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">MEMBERS</p>
-          <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-white drop-shadow-md sm:text-5xl">
+          <div className="rounded-2xl bg-black/18 px-8 py-6 backdrop-blur-[2px]">
+            <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">MEMBERS</p>
+            <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)] sm:text-5xl">
             함께하는 멤버들
-          </h1>
-          <p className="reveal-up delay-2 mx-auto mt-4 max-w-2xl text-lg text-white/90">
-            기획, 디자인, 개발이 함께 모여 더 나은 결과를 만듭니다.
-          </p>
+            </h1>
+            <p className="reveal-up delay-2 mx-auto mt-4 max-w-xl text-lg leading-relaxed text-white/92">
+              기획, 디자인, 개발이 함께 모여 더 나은 결과를 만듭니다.
+            </p>
+          </div>
         </div>
         <a
           href="#members-content"
@@ -164,11 +166,6 @@ export default function MembersPage() {
           <div className="mb-6 rounded-card bg-red-50/80 border border-red-200 p-4 text-red-700">
             <p>데이터를 불러오는데 실패했습니다.</p>
           </div>
-        )}
-
-        {/* 로딩 */}
-        {membersQuery.isLoading && (
-          <p className="text-center text-muruk-green-muted">불러오는 중…</p>
         )}
 
         {/* 빈 상태 */}
