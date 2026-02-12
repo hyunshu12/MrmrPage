@@ -11,20 +11,20 @@ export const achievementsQueryKey = ['achievements'] as const;
 export function useMembers() {
   return useQuery<Member[]>({
     queryKey: membersQueryKey,
-    queryFn: fetchMembers,
+    queryFn: ({ signal }) => fetchMembers(signal),
   });
 }
 
 export function useProjects() {
   return useQuery<Project[]>({
     queryKey: projectsQueryKey,
-    queryFn: fetchProjects,
+    queryFn: ({ signal }) => fetchProjects(signal),
   });
 }
 
 export function useAchievements() {
   return useQuery<Achievement[]>({
     queryKey: achievementsQueryKey,
-    queryFn: fetchAchievements,
+    queryFn: ({ signal }) => fetchAchievements(signal),
   });
 }
