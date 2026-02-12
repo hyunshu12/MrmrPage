@@ -9,6 +9,11 @@ import QueryClientProvider from '@/providers/QueryClientProvider';
 export const metadata: Metadata = {
   title: '무럭무럭 | MurukMuruk',
   description: 'PLANT US RAISE EARTH — 무럭무럭 동아리 홍보 페이지',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
 };
 
 interface RootLayoutProps {
