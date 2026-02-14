@@ -9,7 +9,7 @@ import QueryClientProvider from '@/providers/QueryClientProvider';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mrmr.kr';
 const SITE_NAME = '무럭무럭 | MurukMuruk';
 const SITE_DESCRIPTION =
-  '디미고(한국디지털미디어고등학교) 스마트팜 동아리 무럭무럭 공식 웹사이트. 프로젝트, 업적, 멤버 소개와 동아리 활동을 확인할 수 있습니다.';
+  '한국디지털미디어고등학교 스마트팜 동아리 무럭무럭 공식 웹사이트.';
 const SITE_KEYWORDS = [
   '무럭무럭',
   '디미고 무럭무럭',

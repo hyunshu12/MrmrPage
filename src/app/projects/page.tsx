@@ -160,7 +160,7 @@ export default function ProjectsPage() {
           <div className="rounded-2xl bg-black/18 px-8 py-6 backdrop-blur-[2px]">
             <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">PROJECT</p>
             <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)] sm:text-5xl">
-              우리가 만든 프로젝트
+              프로젝트
             </h1>
             <p className="reveal-up delay-2 mx-auto mt-4 max-w-xl text-lg leading-relaxed text-white/92">
               아이디어를 실제 서비스로 구현하며, 팀 협업과 문제 해결 경험을 쌓아갑니다.
