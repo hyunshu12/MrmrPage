@@ -1,7 +1,6 @@
 'use client';
 
 import { useAchievements } from '@/hooks/useApi';
-import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 function parseYear(value: string): number | null {
@@ -147,15 +146,13 @@ export default function AchievementsPage() {
         }}
         className="relative h-screen overflow-hidden"
       >
-        <Image
+        <img
           src="/archiveImage.png"
           alt="업적 소개 대표 이미지"
-          fill
-          className="object-cover object-center"
+          className="h-full w-full object-cover object-center"
           loading="eager"
           fetchPriority="high"
-          sizes="100vw"
-          priority
+          decoding="async"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">

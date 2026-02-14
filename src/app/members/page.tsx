@@ -2,7 +2,6 @@
 
 import nextDynamic from 'next/dynamic';
 import { useMembers } from '@/hooks/useApi';
-import Image from 'next/image';
 
 const MembersTabs = nextDynamic(() => import('@/components/members/MembersTabs.client'), {
   ssr: true,
@@ -121,15 +120,13 @@ export default function MembersPage() {
         }}
         className="relative h-screen overflow-hidden"
       >
-        <Image
+        <img
           src="/memberImage.png"
           alt="멤버 소개 대표 이미지"
-          fill
-          className="object-cover object-center"
+          className="h-full w-full object-cover object-center"
           loading="eager"
           fetchPriority="high"
-          sizes="100vw"
-          priority
+          decoding="async"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">

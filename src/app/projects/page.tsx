@@ -1,9 +1,7 @@
 'use client';
 
 import { useProjects } from '@/hooks/useApi';
-import Image from 'next/image';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import projectHeroImage from '../../../public/projectImage.png';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -148,15 +146,14 @@ export default function ProjectsPage() {
         }}
         className="relative h-screen overflow-hidden"
       >
-        <Image
-          src={projectHeroImage}
+        <img
+          src="/projectImage.png"
           alt="프로젝트 소개 대표 이미지"
-          fill
-          className="scale-[1.12] object-cover object-center"
+          className="h-full w-full scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
-          placeholder="blur"
-          sizes="100vw"
-          priority
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
