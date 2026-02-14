@@ -21,6 +21,9 @@ export default function HomePage() {
   const englishFontStyle = { fontFamily: "'Crimson Text', serif" } as const;
 
   useEffect(() => {
+    const shouldUseSnap = window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 1024;
+    if (!shouldUseSnap) return;
+
     const sections = sectionRefs.current.filter(Boolean) as HTMLElement[];
     if (sections.length === 0) return;
 
@@ -121,7 +124,7 @@ export default function HomePage() {
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative flex h-screen flex-col items-center justify-center px-4 text-center"
+        className="relative flex min-h-[100svh] flex-col items-center justify-center px-4 text-center"
       >
         <div className="float-slower pointer-events-none absolute left-[8%] top-[20%] h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
         <div className="drift-slow pointer-events-none absolute right-[10%] top-[30%] h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
@@ -138,20 +141,20 @@ export default function HomePage() {
 
         {/* PLANT US / RAISE EARTH */}
         <h2
-          className="reveal-up mt-6 text-xl font-semibold tracking-wide text-muruk-green-dark sm:mt-8 sm:text-3xl lg:text-4xl xl:text-5xl"
+          className="reveal-up mt-5 text-lg font-semibold tracking-wide text-muruk-green-dark sm:mt-8 sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl"
           style={englishFontStyle}
         >
           PLANT US
         </h2>
         <h2
-          className="reveal-up delay-1 mt-1 text-xl font-semibold tracking-wide text-muruk-green-dark sm:text-3xl lg:text-4xl xl:text-5xl"
+          className="reveal-up delay-1 mt-1 text-lg font-semibold tracking-wide text-muruk-green-dark sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl"
           style={englishFontStyle}
         >
           RAISE EARTH
         </h2>
 
         {/* 무럭무럭 */}
-        <h1 className="reveal-up delay-2 mt-4 text-5xl font-bold leading-none text-muruk-green-darker sm:mt-6 sm:text-7xl lg:text-8xl xl:text-9xl">
+        <h1 className="reveal-up delay-2 mt-4 text-4xl font-bold leading-none text-muruk-green-darker sm:mt-6 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
           무럭무럭
         </h1>
 
@@ -161,7 +164,14 @@ export default function HomePage() {
           aria-label="홈 소개 내용으로 이동"
           className="absolute bottom-10 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80"
         >
-          <svg className="mx-auto h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            className="mx-auto h-7 w-7"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </a>
@@ -173,9 +183,9 @@ export default function HomePage() {
         ref={(el) => {
           sectionRefs.current[1] = el;
         }}
-        className="flex min-h-screen items-center justify-center px-4 py-24 text-center"
+        className="flex min-h-[100svh] items-center justify-center px-4 py-20 text-center sm:py-24"
       >
-        <p className="reveal-up mx-auto max-w-4xl text-left text-base font-normal leading-8 text-muruk-green-deepest/95 sm:text-lg sm:leading-9 lg:text-[1.32rem] lg:leading-10">
+        <p className="text-balance-safe reveal-up mx-auto max-w-4xl text-left text-[0.98rem] font-normal leading-7 text-muruk-green-deepest/95 sm:text-base sm:leading-8 md:text-lg md:leading-9 lg:text-[1.32rem] lg:leading-10">
           ‘무럭무럭’은 식물이 자라나는 모습을 뜻하는 말처럼, 작은 변화가 쌓여 결국 분명한 성장을 만들어내듯 경험과 실천을 통해
           가능성을 키워가는 동아리입니다. 한국디지털미디어고등학교의 유일한 스마트팜 동아리로서 우리는 기술과 농업을 연결하며 스마트팜을
           통해 농업의 새로운 가능성을 제시하고자 합니다. 또한 농촌과 관련된 IT 프로젝트를 기획해 농업과 기술이 함께 성장할 수 있는
@@ -188,9 +198,9 @@ export default function HomePage() {
         ref={(el) => {
           sectionRefs.current[2] = el;
         }}
-        className="mx-auto flex min-h-screen max-w-7xl items-center px-4 py-20 sm:px-6"
+        className="mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 py-16 sm:px-6 sm:py-20"
       >
-        <article className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-14">
+        <article className="grid w-full items-center gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="group relative overflow-hidden rounded-card bg-muruk-card-bg shadow-md">
             {projectsQuery.isLoading ? (
               <div className="aspect-[16/10]" />
@@ -210,11 +220,11 @@ export default function HomePage() {
 
           <div className="reveal-up">
             <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">PROJECT</p>
-            <h3 className="mt-3 text-3xl font-bold text-muruk-green-darker sm:text-4xl">프로젝트</h3>
+            <h3 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">프로젝트</h3>
             {projectsQuery.isLoading ? (
               <div className="mt-6 h-28" />
             ) : (
-              <p className="mt-6 max-w-2xl text-base leading-8 text-muruk-green-text/90 sm:text-lg sm:leading-relaxed">
+              <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-text/90 sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
                 무럭무럭은 스마트팜을 기반으로 한 {projects.length}개의 프로젝트를 진행하며 농업이 마주한 여러 사회적 문제에
                 주목해왔습니다. 농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의 가치를 일상 속에서 다시 인식할 수 있도록 노력
                 하였습니다.
@@ -237,13 +247,13 @@ export default function HomePage() {
         ref={(el) => {
           sectionRefs.current[3] = el;
         }}
-        className="mx-auto flex min-h-screen max-w-7xl items-center px-4 py-20 sm:px-6"
+        className="mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 py-16 sm:px-6 sm:py-20"
       >
-        <article className="grid w-full items-center gap-8 lg:grid-cols-2 lg:gap-14">
+        <article className="grid w-full items-center gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
           <div className="reveal-up order-2 lg:order-1">
             <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">ACHIEVEMENT</p>
-            <h3 className="mt-3 text-3xl font-bold text-muruk-green-darker sm:text-4xl">업적</h3>
-            <p className="mt-6 max-w-2xl text-base leading-8 text-muruk-green-text/90 sm:text-lg sm:leading-relaxed">
+            <h3 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">업적</h3>
+            <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-text/90 sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
               무럭무럭은 기술과 농업을 연결하는 창업 프로젝트에 꾸준히 도전해왔습니다. 2024년 교내 해커톤 1위를 포함한 다수의 수상
               성과와, 2025년 직업계고 청년 창업아아디어 공모전 대상 및 상위권 입상을 통해 기획력과 실행력을 인정받았습니다. 이러한 성과는 단순한 수상의
               결과가 아니라, 농업의 문제를 기술적 시각으로 재해석하고 그 가치를 사회적으로 확장해온 과정의 증거입니다. 무럭무럭은 매년

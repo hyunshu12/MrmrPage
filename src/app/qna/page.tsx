@@ -35,19 +35,19 @@ export default function QnaPage() {
 
   return (
     <div className="min-h-screen bg-gradient-home">
-      <section className="relative px-4 pt-28 text-center sm:pt-32">
+      <section className="relative px-4 pt-24 text-center sm:pt-32">
         <div className="float-slower pointer-events-none absolute left-[8%] top-28 h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
         <div className="drift-slow pointer-events-none absolute right-[10%] top-36 h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
         <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">Q&A</p>
-        <h1 className="reveal-up delay-1 mt-4 text-4xl font-bold text-muruk-green-darker sm:text-5xl">
+        <h1 className="reveal-up delay-1 mt-4 text-3xl font-bold text-muruk-green-darker sm:text-4xl lg:text-5xl">
           자주 묻는 질문
         </h1>
-        <p className="reveal-up delay-2 mx-auto mt-4 max-w-2xl text-lg text-muruk-green-text/85">
+        <p className="text-balance-safe reveal-up delay-2 mx-auto mt-4 max-w-2xl text-base text-muruk-green-text/85 sm:text-lg">
           무럭무럭 지원 전 궁금한 내용을 먼저 확인해 보세요.
         </p>
       </section>
 
-      <section className="mx-auto max-w-4xl px-4 pb-24 pt-14 sm:px-6">
+      <section className="mx-auto max-w-4xl px-4 pb-20 pt-12 sm:px-6 sm:pb-24 sm:pt-14">
         <div className="space-y-4">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
@@ -60,10 +60,12 @@ export default function QnaPage() {
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left transition-colors hover:bg-muruk-card-bg/70"
+                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-muruk-card-bg/70 sm:gap-4 sm:px-6 sm:py-5"
                 >
-                  <h2 className="text-lg font-semibold text-muruk-green-darker sm:text-xl">{faq.question}</h2>
-                  <span className="text-2xl leading-none text-muruk-green-primary">{isOpen ? '−' : '+'}</span>
+                  <h2 className="text-balance-safe text-base font-semibold text-muruk-green-darker sm:text-lg md:text-xl">
+                    {faq.question}
+                  </h2>
+                  <span className="text-xl leading-none text-muruk-green-primary sm:text-2xl">{isOpen ? '−' : '+'}</span>
                 </button>
 
                 <div
@@ -73,11 +75,13 @@ export default function QnaPage() {
                 >
                   <div className="overflow-hidden">
                     <div
-                      className={`border-t border-muruk-green-border/20 px-6 py-5 transition-all duration-500 ease-out ${
+                      className={`border-t border-muruk-green-border/20 px-4 py-4 transition-all duration-500 ease-out sm:px-6 sm:py-5 ${
                         isOpen ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
                       }`}
                     >
-                      <p className="text-base leading-relaxed text-muruk-green-text/90">{faq.answer}</p>
+                      <p className="text-balance-safe text-sm leading-relaxed text-muruk-green-text/90 sm:text-base">
+                        {faq.answer}
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -66,7 +66,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
   return (
     <div className="space-y-10">
       {/* 기수 탭 */}
-      <div className="flex flex-wrap gap-3 pb-2">
+      <div className="flex flex-wrap gap-2.5 pb-2 sm:gap-3">
         {murukKeys.map((key) => {
           const isActive = key === selectedKey;
           return (
@@ -74,7 +74,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
               key={key}
               type="button"
               onClick={() => setSelectedKey(key)}
-              className={`whitespace-nowrap rounded-btn border px-5 py-2.5 text-base font-semibold transition-all duration-300 ease-out ${
+              className={`whitespace-nowrap rounded-btn border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out sm:px-5 sm:py-2.5 sm:text-base ${
                 isActive
                   ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
                   : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
@@ -87,7 +87,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
       </div>
 
       {/* 멤버 카드 그리드 */}
-      <div key={selectedKey} className="reveal-up grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+      <div key={selectedKey} className="reveal-up grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
         {selectedMembers.map((member) => {
           const lineColor = getRoleColor(member.role);
           const avatarPosition = normalizeAvatarPosition(member.avatarPosition);
@@ -113,9 +113,9 @@ export default function MembersTabs({ members }: { members: Member[] }) {
               </div>
 
               {/* 정보 영역 */}
-              <div className="p-5 text-center">
+              <div className="p-4 text-center sm:p-5">
                 {/* 이름 */}
-                <h3 className="text-2xl font-semibold text-gray-900">{member.name}</h3>
+                <h3 className="text-balance-safe text-xl font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
 
                 {/* 역할 색상 라인 */}
                 <div
@@ -124,7 +124,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
                 />
 
                 {/* 역할 & 학과 & 상태 메시지 */}
-                <div className="mt-3 space-y-0.5 text-sm text-gray-600">
+                <div className="mt-3 space-y-0.5 text-xs text-gray-600 sm:text-sm">
                   {member.role && <p>{member.role}</p>}
                   {(member.schoolGeneration || member.className) && (
                     <p>
@@ -134,7 +134,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
                     </p>
                   )}
                   {member.statusMessage && (
-                    <p className="break-words whitespace-pre-line leading-relaxed text-gray-500">
+                    <p className="text-balance-safe break-words whitespace-pre-line leading-relaxed text-gray-500">
                       {member.statusMessage}
                     </p>
                   )}
