@@ -25,12 +25,11 @@ const faqs = [
   },
   {
     question: '활동 시간은 어느 정도인가요?',
-    answer:
-      '서가별이 하고 싶을 때 합니다.',
+    answer: '서가별이 하고 싶을 때 합니다.',
   },
 ];
 
-export default function QnaPage() {
+export default function FaqPage() {
   const [openIndex, setOpenIndex] = useState<number>(0);
 
   return (
@@ -38,7 +37,7 @@ export default function QnaPage() {
       <section className="relative px-4 pt-24 text-center sm:pt-32">
         <div className="float-slower pointer-events-none absolute left-[8%] top-28 h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
         <div className="drift-slow pointer-events-none absolute right-[10%] top-36 h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
-        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">Q&A</p>
+        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">FAQ</p>
         <h1 className="reveal-up delay-1 mt-4 text-3xl font-bold text-muruk-green-darker sm:text-4xl lg:text-5xl">
           자주 묻는 질문
         </h1>
@@ -93,4 +92,3 @@ export default function QnaPage() {
     </div>
   );
 }
-

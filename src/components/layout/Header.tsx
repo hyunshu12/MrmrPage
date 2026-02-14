@@ -10,7 +10,7 @@ const navItems = [
   { href: '/projects', label: '프로젝트' },
   { href: '/achievements', label: '업적' },
   { href: '/members', label: '멤버소개' },
-  { href: '/qna', label: 'Q&A' },
+  { href: '/faq', label: 'FAQ' },
 ];
 
 export default function Header() {
