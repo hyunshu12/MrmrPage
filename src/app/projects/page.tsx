@@ -149,7 +149,7 @@ export default function ProjectsPage() {
         <img
           src="/projectImage.png"
           alt="프로젝트 소개 대표 이미지"
-          className="h-full w-full scale-[1.12] object-cover object-center"
+          className="absolute inset-0 h-full w-full scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
           loading="eager"
           fetchPriority="high"

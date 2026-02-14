@@ -123,7 +123,7 @@ export default function MembersPage() {
         <img
           src="/memberImage.png"
           alt="멤버 소개 대표 이미지"
-          className="h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           loading="eager"
           fetchPriority="high"
           decoding="async"

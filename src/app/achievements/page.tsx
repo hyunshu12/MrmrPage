@@ -149,7 +149,7 @@ export default function AchievementsPage() {
         <img
           src="/archiveImage.png"
           alt="업적 소개 대표 이미지"
-          className="h-full w-full object-cover object-center"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           loading="eager"
           fetchPriority="high"
           decoding="async"
@@ -252,13 +252,13 @@ export default function AchievementsPage() {
                         {achievement.name}
                       </h2>
                       <div className="mt-3 space-y-1 text-sm text-gray-600">
-                        {achievement.team && <p className="truncate">{achievement.team}</p>}
-                        {achievement.date && <p>{achievement.date}</p>}
-                        {achievement.members.length > 0 ? (
-                          <p className="truncate text-gray-500">
-                            {achievement.members.join(', ')}
+                        {(achievement.team || achievement.members.length > 0) && (
+                          <p className="truncate">
+                            {achievement.team ?? '팀'}
+                            {achievement.members.length > 0 ? ` - ${achievement.members.join(', ')}` : ''}
                           </p>
-                        ) : null}
+                        )}
+                        {achievement.date && <p>{achievement.date}</p>}
                       </div>
                     </div>
                     {achievement.award && (

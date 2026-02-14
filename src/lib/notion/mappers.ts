@@ -55,6 +55,14 @@ function getMultiSelect(prop: PropertyValue | undefined): string[] {
   return [];
 }
 
+function splitNameList(value: string | null): string[] {
+  if (!value) return [];
+  return value
+    .split(',')
+    .map((name) => name.trim())
+    .filter((name) => name.length > 0);
+}
+
 function getNumber(prop: PropertyValue | undefined): number {
   if (prop?.type === 'number' && prop.number !== null) {
     return prop.number;
@@ -119,6 +127,39 @@ function getTextByCandidates(props: NotionProperties, candidates: string[]): str
   return null;
 }
 
+function getMultiSelectByCandidates(props: NotionProperties, candidates: string[]): string[] {
+  for (const candidate of candidates) {
+    const direct = getMultiSelect(props[candidate]);
+    if (direct.length > 0) return direct;
+  }
+
+  const normalizedEntries = Object.entries(props).map(([key, value]) => ({
+    key,
+    normalized: normalizeKey(key),
+    value,
+  }));
+
+  for (const candidate of candidates) {
+    const normalizedCandidate = normalizeKey(candidate);
+    const matched = normalizedEntries.find((entry) => entry.normalized === normalizedCandidate);
+    if (matched) {
+      const value = getMultiSelect(matched.value);
+      if (value.length > 0) return value;
+    }
+  }
+
+  for (const candidate of candidates) {
+    const normalizedCandidate = normalizeKey(candidate);
+    const matched = normalizedEntries.find((entry) => entry.normalized.includes(normalizedCandidate));
+    if (matched) {
+      const value = getMultiSelect(matched.value);
+      if (value.length > 0) return value;
+    }
+  }
+
+  return [];
+}
+
 export function mapPageToMember(page: PageObjectResponse): Member {
   const props = page.properties;
   const avatarPosition = getTextByCandidates(props, [
@@ -163,14 +204,18 @@ export function mapPageToProject(page: PageObjectResponse): Project {
 
 export function mapPageToAchievement(page: PageObjectResponse): Achievement {
   const props = page.properties;
+  const team = getTextByCandidates(props, ['Team', '팀', '팀명']);
+  const membersFromMultiSelect = getMultiSelectByCandidates(props, ['Members', 'members', 'Member', '팀원']);
+  const membersFromText = splitNameList(getTextByCandidates(props, ['Members', 'members', 'Member', '팀원']));
+  const members = membersFromMultiSelect.length > 0 ? membersFromMultiSelect : membersFromText;
 
   return {
     id: page.id,
     name: getTitleText(props.Name),
     year: getSelect(props.Year) ?? getRichText(props.Year),
     award: getRichText(props.Award),
-    team: getRichText(props.Team),
-    members: getMultiSelect(props.Members),
+    team,
+    members,
     date: getDate(props.Date),
     thumbnailUrl: getFileUrl(props.Thumbnail),
     order: getNumber(props.Order),
