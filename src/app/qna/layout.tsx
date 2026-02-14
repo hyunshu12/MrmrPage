@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/qna',
   },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function QnaLayout({ children }: { children: ReactNode }) {

@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/achievements',
   },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function AchievementsLayout({ children }: { children: ReactNode }) {

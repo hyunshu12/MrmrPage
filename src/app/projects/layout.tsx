@@ -13,6 +13,14 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/projects',
   },
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function ProjectsLayout({ children }: { children: ReactNode }) {
