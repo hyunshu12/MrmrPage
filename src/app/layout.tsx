@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import QueryClientProvider from '@/providers/QueryClientProvider';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mrmr.kr';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mrmr.kr';
 const SITE_NAME = '무럭무럭 | MurukMuruk';
 const SITE_DESCRIPTION =
   '한국디지털미디어고등학교 스마트팜 동아리 무럭무럭 공식 웹사이트.';
