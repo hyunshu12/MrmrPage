@@ -255,7 +255,7 @@ export default function HomePage() {
             <h3 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">업적</h3>
             <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-text/90 sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
               무럭무럭은 기술과 농업을 연결하는 창업 프로젝트에 꾸준히 도전해왔습니다. 2024년 교내 해커톤 1위를 포함한 다수의 수상
-              성과와, 2025년 직업계고 청년 창업아아디어 공모전 대상 및 상위권 입상을 통해 기획력과 실행력을 인정받았습니다. 이러한 성과는 단순한 수상의
+              성과와, 2025 데이터 크리에이터 캠프 최우수상 수상 및 상위권 입상을 통해 기획력과 실행력을 인정받았습니다. 이러한 성과는 단순한 수상의
               결과가 아니라, 농업의 문제를 기술적 시각으로 재해석하고 그 가치를 사회적으로 확장해온 과정의 증거입니다. 무럭무럭은 매년
               새로운 도전을 통해 농업과 기술이 함께 성장할 수 있는 방향을 모색하며, 아이디어를 실천으로 증명해가고 있습니다.
             </p>
