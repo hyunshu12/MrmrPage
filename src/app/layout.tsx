@@ -7,7 +7,7 @@ import Header from '@/components/layout/Header';
 import QueryClientProvider from '@/providers/QueryClientProvider';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mrmr.kr';
-const SITE_NAME = '무럭무럭 | MurukMuruk';
+const SITE_NAME = '무럭무럭 | MRMR';
 const SITE_DESCRIPTION =
   '한국디지털미디어고등학교 스마트팜 동아리 무럭무럭 공식 웹사이트.';
 const SITE_KEYWORDS = [
@@ -17,6 +17,7 @@ const SITE_KEYWORDS = [
   '스마트팜 동아리 무럭무럭',
   '디미고 스마트팜 동아리',
   '한국디지털미디어고등학교 동아리',
+  'MRMR',
   'MurukMuruk',
 ] as const;
 const GOOGLE_SITE_VERIFICATION = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION;
@@ -26,14 +27,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     default: SITE_NAME,
-    template: '%s | 무럭무럭 MurukMuruk',
+    template: '%s | 무럭무럭 | MRMR',
   },
   description: SITE_DESCRIPTION,
   keywords: [...SITE_KEYWORDS],
   applicationName: '무럭무럭',
-  authors: [{ name: '무럭무럭 MurukMuruk', url: SITE_URL }],
-  creator: '무럭무럭 MurukMuruk',
-  publisher: '무럭무럭 MurukMuruk',
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
   category: 'Education',
   robots: {
     index: true,
@@ -60,7 +61,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'ko_KR',
     url: SITE_URL,
-    siteName: '무럭무럭 MurukMuruk',
+    siteName: SITE_NAME,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     images: [
@@ -104,7 +105,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const websiteJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: '무럭무럭 MurukMuruk',
+    name: SITE_NAME,
     alternateName: ['디미고 무럭무럭', '한국디지털미디어고등학교 무럭무럭', '스마트팜 동아리 무럭무럭'],
     url: SITE_URL,
     inLanguage: 'ko-KR',
@@ -113,7 +114,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   const organizationJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: '무럭무럭 MurukMuruk',
+    name: SITE_NAME,
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     logo: `${SITE_URL}/logo.png`,
