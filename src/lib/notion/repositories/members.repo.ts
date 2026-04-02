@@ -1,11 +1,12 @@
 import { env } from '@/lib/env';
 import { type Member, memberArraySchema } from '@/types/member';
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { unstable_cache } from 'next/cache';
 import { getNotionClient } from '../client';
 import { mapPageToMember } from '../mappers';
 import { createOrderAscSort, createPublishedFilter } from '../queries';
 
-export async function getPublishedMembers(): Promise<Member[]> {
+async function fetchPublishedMembers(): Promise<Member[]> {
   const notion = getNotionClient();
 
   const response = await notion.databases.query({
@@ -26,5 +27,10 @@ export async function getPublishedMembers(): Promise<Member[]> {
 
   return parsed.data.filter((m) => m.name.trim().length > 0);
 }
+
+export const getPublishedMembers = unstable_cache(fetchPublishedMembers, ['notion-members'], {
+  revalidate: 3600,
+  tags: ['members'],
+});
 
 // getMemberBySlug removed: Members DB has no Slug column.

@@ -1,10 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
 import './globals.css';
-import AppBootGate from '@/components/AppBootGate.client';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
-import QueryClientProvider from '@/providers/QueryClientProvider';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mrmr.kr';
 const SITE_NAME = '무럭무럭 | MRMR';
@@ -131,13 +129,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
         />
       </head>
       <body className="flex min-h-screen flex-col font-crimson">
-        <QueryClientProvider>
-          <AppBootGate>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </AppBootGate>
-        </QueryClientProvider>
+        <Header />
+        <main className="flex-1">{children}</main>
+        <Footer />
       </body>
     </html>
   );

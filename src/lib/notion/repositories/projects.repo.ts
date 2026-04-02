@@ -1,11 +1,12 @@
 import { env } from '@/lib/env';
 import { type Project, projectArraySchema } from '@/types/project';
 import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { unstable_cache } from 'next/cache';
 import { getNotionClient } from '../client';
 import { mapPageToProject } from '../mappers';
 import { createOrderAscSort, createPublishedFilter } from '../queries';
 
-export async function getPublishedProjects(): Promise<Project[]> {
+async function fetchPublishedProjects(): Promise<Project[]> {
   const notion = getNotionClient();
 
   const response = await notion.databases.query({
@@ -26,5 +27,10 @@ export async function getPublishedProjects(): Promise<Project[]> {
 
   return parsed.data.filter((p) => p.name.trim().length > 0);
 }
+
+export const getPublishedProjects = unstable_cache(fetchPublishedProjects, ['notion-projects'], {
+  revalidate: 3600,
+  tags: ['projects'],
+});
 
 // getProjectBySlug removed: Projects DB has no Slug column.
