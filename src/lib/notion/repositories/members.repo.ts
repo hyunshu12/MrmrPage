@@ -29,7 +29,7 @@ async function fetchPublishedMembers(): Promise<Member[]> {
 }
 
 export const getPublishedMembers = unstable_cache(fetchPublishedMembers, ['notion-members'], {
-  revalidate: 3600,
+  revalidate: 1800,
   tags: ['members'],
 });
 

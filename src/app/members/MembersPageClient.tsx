@@ -17,8 +17,7 @@ export default function MembersPageClient({ members }: MembersPageClientProps) {
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative min-h-[100svh] overflow-hidden"
-      >
+        className="relative min-h-[100svh] overflow-hidden">
         <img
           src="/memberImage.png"
           alt="멤버 소개 대표 이미지"
@@ -42,16 +41,14 @@ export default function MembersPageClient({ members }: MembersPageClientProps) {
         <a
           href="#members-content"
           aria-label="멤버 소개 내용으로 이동"
-          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90"
-        >
+          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90">
           <svg
             aria-hidden="true"
             focusable="false"
             className="mx-auto h-7 w-7"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </a>
@@ -62,8 +59,7 @@ export default function MembersPageClient({ members }: MembersPageClientProps) {
         ref={(el) => {
           sectionRefs.current[1] = el;
         }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20"
-      >
+        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
         {members.length === 0 ? (
           <div className="rounded-card bg-muruk-card-bg p-12 text-center text-muruk-green-muted">
             등록된 멤버가 없습니다.

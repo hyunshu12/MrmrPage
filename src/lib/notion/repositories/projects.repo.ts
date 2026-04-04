@@ -29,7 +29,7 @@ async function fetchPublishedProjects(): Promise<Project[]> {
 }
 
 export const getPublishedProjects = unstable_cache(fetchPublishedProjects, ['notion-projects'], {
-  revalidate: 3600,
+  revalidate: 1800,
   tags: ['projects'],
 });
 

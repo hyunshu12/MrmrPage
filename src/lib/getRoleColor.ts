@@ -9,13 +9,7 @@ export function getRoleColor(role: string | null): string {
   const r = role.toLowerCase();
   if (r.includes('개발') || r.includes('dev')) return '#2f5eff';
   if (r.includes('디자인') || r.includes('design')) return '#ff5fa2';
-  if (
-    r.includes('기획') ||
-    r.includes('pm') ||
-    r.includes('프로젝트') ||
-    r.includes('매니저') ||
-    r.includes('manager')
-  )
+  if (r.includes('기획') || r.includes('pm') || r.includes('프로젝트') || r.includes('매니저') || r.includes('manager'))
     return '#2dbe8d';
   return '#2dbe8d';
 }

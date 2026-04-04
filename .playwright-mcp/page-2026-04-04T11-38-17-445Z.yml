@@ -1,0 +1,61 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "무럭무럭 로고" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "무럭무럭 로고" [ref=e5]
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "홈" [ref=e8] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e9]:
+          - link "프로젝트" [ref=e10] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e11]:
+          - link "업적" [ref=e12] [cursor=pointer]:
+            - /url: /achievements
+        - listitem [ref=e13]:
+          - link "멤버소개" [ref=e14] [cursor=pointer]:
+            - /url: /members
+        - listitem [ref=e15]:
+          - link "FAQ" [ref=e16] [cursor=pointer]:
+            - /url: /faq
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "무럭무럭 로고" [ref=e20]
+        - heading "PLANT US" [level=2] [ref=e21]
+        - heading "RAISE EARTH" [level=2] [ref=e22]
+        - heading "무럭무럭" [level=1] [ref=e23]
+        - link "홈 소개 내용으로 이동" [ref=e24] [cursor=pointer]:
+          - /url: "#home-intro"
+          - img [ref=e25]
+      - paragraph [ref=e28]: "'무럭무럭'은 식물이 자라나는 모습을 뜻하는 말처럼, 작은 변화가 쌓여 결국 분명한 성장을 만들어내듯 경험과 실천을 통해 가능성을 키워가는 동아리입니다. 한국디지털미디어고등학교의 유일한 스마트팜 동아리로서 우리는 기술과 농업을 연결하며 스마트팜을 통해 농업의 새로운 가능성을 제시하고자 합니다. 또한 농촌과 관련된 IT 프로젝트를 기획해 농업과 기술이 함께 성장할 수 있는 방향을 모색합니다. 기획·디자인·개발이 어우러진 협업 속에서 아이디어를 현실로 발전시키고, 이를 사회적 가치로 확장해 더 나은 미래에 기여하는 것을 목표로 합니다."
+      - article [ref=e30]:
+        - img "파밍고" [ref=e32]
+        - generic [ref=e33]:
+          - paragraph [ref=e34]: PROJECT
+          - heading "프로젝트" [level=3] [ref=e35]
+          - paragraph [ref=e36]: 무럭무럭은 스마트팜을 기반으로 한 8개의 프로젝트를 진행하며 농업이 마주한 여러 사회적 문제에 주목해왔습니다. 농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의 가치를 일상 속에서 다시 인식할 수 있도록 노력 하였습니다.
+          - link "프로젝트 바로가기 →" [ref=e38] [cursor=pointer]:
+            - /url: /projects
+            - generic [ref=e39]: 프로젝트 바로가기
+            - generic [ref=e40]: →
+      - article [ref=e42]:
+        - generic [ref=e43]:
+          - paragraph [ref=e44]: ACHIEVEMENT
+          - heading "업적" [level=3] [ref=e45]
+          - paragraph [ref=e46]: 무럭무럭은 기술과 농업을 연결하는 창업 프로젝트에 꾸준히 도전해왔습니다. 2024년 교내 해커톤 1위를 포함한 다수의 수상 성과와, 2025 데이터 크리에이터 캠프 최우수상 수상 및 상위권 입상을 통해 기획력과 실행력을 인정받았습니다. 이러한 성과는 단순한 수상의 결과가 아니라, 농업의 문제를 기술적 시각으로 재해석하고 그 가치를 사회적으로 확장해온 과정의 증거입니다. 무럭무럭은 매년 새로운 도전을 통해 농업과 기술이 함께 성장할 수 있는 방향을 모색하며, 아이디어를 실천으로 증명해가고 있습니다.
+          - link "업적 바로가기 →" [ref=e48] [cursor=pointer]:
+            - /url: /achievements
+            - generic [ref=e49]: 업적 바로가기
+            - generic [ref=e50]: →
+        - img "2025 데이터 크리에이터 캠프" [ref=e52]
+  - contentinfo [ref=e53]:
+    - generic [ref=e54]:
+      - navigation "소셜 미디어 링크"
+      - paragraph [ref=e55]: © 2026 무럭무럭 | MRMR. All rights reserved.
+      - paragraph [ref=e56]: PLANT US RAISE EARTH
+  - button "Open Next.js Dev Tools" [ref=e62] [cursor=pointer]:
+    - img [ref=e63]
+  - alert [ref=e66]

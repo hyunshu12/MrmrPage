@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 @import "tailwindcss";
 
 @config '../../tailwind.config.ts';
@@ -42,7 +42,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-family: 'Crimson Text', 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Crimson Text", "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.45;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -156,7 +156,7 @@ body {
 }
 
 .divider-shine::after {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   width: 40%;
@@ -197,16 +197,12 @@ body {
   border: 1px solid rgba(114, 128, 92, 0.4);
   background: rgba(255, 255, 255, 0.8);
   color: #394e25;
-  transition:
-    transform 240ms ease,
-    border-color 240ms ease,
-    box-shadow 240ms ease,
-    background-color 240ms ease;
+  transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease, background-color 240ms ease;
   backdrop-filter: blur(6px);
 }
 
 .kakao-shortcut::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-102%);

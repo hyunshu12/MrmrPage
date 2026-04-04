@@ -78,8 +78,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
                 isActive
                   ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
                   : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-              }`}
-            >
+              }`}>
               {key}
             </button>
           );
@@ -94,8 +93,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
           return (
             <div
               key={member.id}
-              className="content-visibility-auto group overflow-hidden rounded-card bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1"
-            >
+              className="content-visibility-auto group overflow-hidden rounded-card bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
               {/* 프로필 이미지 영역 */}
               <div className="aspect-[312/275] w-full overflow-hidden bg-gray-200">
                 {member.avatarUrl ? (
@@ -118,10 +116,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
                 <h3 className="text-balance-safe text-xl font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
 
                 {/* 역할 색상 라인 */}
-                <div
-                  className="mx-auto mt-2 h-[2px] w-12 rounded-full"
-                  style={{ backgroundColor: lineColor }}
-                />
+                <div className="mx-auto mt-2 h-[2px] w-12 rounded-full" style={{ backgroundColor: lineColor }} />
 
                 {/* 역할 & 학과 & 상태 메시지 */}
                 <div className="mt-3 space-y-0.5 text-xs text-gray-600 sm:text-sm">

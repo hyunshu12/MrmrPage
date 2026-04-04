@@ -48,8 +48,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative min-h-[100svh] overflow-hidden"
-      >
+        className="relative min-h-[100svh] overflow-hidden">
         <img
           src="/projectImage.png"
           alt="프로젝트 소개 대표 이미지"
@@ -74,16 +73,14 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
         <a
           href="#projects-content"
           aria-label="프로젝트 내용으로 이동"
-          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90"
-        >
+          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90">
           <svg
             aria-hidden="true"
             focusable="false"
             className="mx-auto h-7 w-7"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </a>
@@ -94,8 +91,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
         ref={(el) => {
           sectionRefs.current[1] = el;
         }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20"
-      >
+        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
         {/* 연도 탭 */}
         {yearKeys.length > 0 && (
           <div className="mb-12 flex justify-start">
@@ -111,8 +107,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
                       isActive
                         ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
                         : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-                    }`}
-                  >
+                    }`}>
                     {year}
                   </button>
                 );
@@ -134,8 +129,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
             {filteredProjects.map((project) => (
               <div
                 key={project.id}
-                className="content-visibility-auto group flex flex-col overflow-hidden rounded-card bg-muruk-card-bg shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row"
-              >
+                className="content-visibility-auto group flex flex-col overflow-hidden rounded-card bg-muruk-card-bg shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row">
                 <div className="w-full shrink-0 overflow-hidden bg-muruk-green-lightest/30 sm:w-2/5">
                   {project.logoUrl ? (
                     <img

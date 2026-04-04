@@ -29,7 +29,7 @@ async function fetchPublishedAchievements(): Promise<Achievement[]> {
 }
 
 export const getPublishedAchievements = unstable_cache(fetchPublishedAchievements, ['notion-achievements'], {
-  revalidate: 3600,
+  revalidate: 1800,
   tags: ['achievements'],
 });
 

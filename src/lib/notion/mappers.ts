@@ -81,7 +81,7 @@ function getFileUrl(prop: PropertyValue | undefined): string | null {
   if (prop?.type === 'files' && prop.files.length > 0) {
     const file = prop.files[0];
     if (file.type === 'file') {
-      return file.file.url;
+      return `/api/image-proxy?url=${encodeURIComponent(file.file.url)}`;
     }
     if (file.type === 'external') {
       return file.external.url;
