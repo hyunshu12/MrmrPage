@@ -41,6 +41,7 @@ export default function AchievementsPageClient({ achievements }: AchievementsPag
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const activeYear = selectedYear ?? yearKeys[0] ?? null;
   const filteredAchievements = activeYear ? (achievementsByYear[activeYear] ?? []) : [];
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   return (
     <div className="min-h-screen bg-gradient-achievements">
@@ -131,11 +132,18 @@ export default function AchievementsPageClient({ achievements }: AchievementsPag
                 className="content-visibility-auto group flex flex-col overflow-hidden rounded-[20px] border border-muruk-green-primary bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl">
                 {/* 썸네일 이미지 */}
                 <div className="aspect-[2/1] w-full shrink-0 overflow-hidden bg-gray-200">
-                  {achievement.thumbnailUrl ? (
+                  {achievement.thumbnailUrl && !failedImages.has(achievement.id) ? (
                     <img
                       src={achievement.thumbnailUrl}
                       alt={achievement.name}
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      onError={() =>
+                        setFailedImages((prev) => {
+                          const next = new Set(prev);
+                          next.add(achievement.id);
+                          return next;
+                        })
+                      }
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/30">

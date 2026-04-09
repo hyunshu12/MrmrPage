@@ -56,8 +56,12 @@ export default function MembersTabs({ members }: { members: Member[] }) {
     return { membersByMuruk: by, murukKeys: keys };
   }, [members]);
 
-  const [selectedKey, setSelectedKey] = useState<string>(() => murukKeys[0] ?? '미분류');
-  const selectedMembers = membersByMuruk[selectedKey] ?? [];
+  const initialKey = murukKeys[0] ?? null;
+  const [selectedKey, setSelectedKey] = useState<string | null>(initialKey);
+  const [mountedKeys, setMountedKeys] = useState<Set<string>>(() => new Set(initialKey ? [initialKey] : []));
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
+  const activeKey = selectedKey && murukKeys.includes(selectedKey) ? selectedKey : (murukKeys[0] ?? null);
+  const mountedMurukKeys = murukKeys.filter((key) => mountedKeys.has(key) || key === activeKey);
 
   if (murukKeys.length === 0) {
     return null;
@@ -68,12 +72,20 @@ export default function MembersTabs({ members }: { members: Member[] }) {
       {/* 기수 탭 */}
       <div className="flex flex-wrap gap-2.5 pb-2 sm:gap-3">
         {murukKeys.map((key) => {
-          const isActive = key === selectedKey;
+          const isActive = key === activeKey;
           return (
             <button
               key={key}
               type="button"
-              onClick={() => setSelectedKey(key)}
+              onClick={() => {
+                setSelectedKey(key);
+                setMountedKeys((prev) => {
+                  if (prev.has(key)) return prev;
+                  const next = new Set(prev);
+                  next.add(key);
+                  return next;
+                });
+              }}
               className={`whitespace-nowrap rounded-btn border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out sm:px-5 sm:py-2.5 sm:text-base ${
                 isActive
                   ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
@@ -86,59 +98,76 @@ export default function MembersTabs({ members }: { members: Member[] }) {
       </div>
 
       {/* 멤버 카드 그리드 */}
-      <div key={selectedKey} className="reveal-up grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
-        {selectedMembers.map((member) => {
-          const lineColor = getRoleColor(member.role);
-          const avatarPosition = normalizeAvatarPosition(member.avatarPosition);
-          return (
-            <div
-              key={member.id}
-              className="content-visibility-auto group overflow-hidden rounded-card bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
-              {/* 프로필 이미지 영역 */}
-              <div className="aspect-[312/275] w-full overflow-hidden bg-gray-200">
-                {member.avatarUrl ? (
-                  <img
-                    src={member.avatarUrl}
-                    alt={member.name}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    style={avatarPosition ? { objectPosition: avatarPosition } : undefined}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/40">
-                    <span className="text-5xl text-muruk-green-muted/30">🌿</span>
+      {mountedMurukKeys.map((murukKey) => {
+        const panelMembers = membersByMuruk[murukKey] ?? [];
+        const isActive = murukKey === activeKey;
+
+        return (
+          <div
+            key={murukKey}
+            hidden={!isActive}
+            className="reveal-up grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
+            {panelMembers.map((member) => {
+              const lineColor = getRoleColor(member.role);
+              const avatarPosition = normalizeAvatarPosition(member.avatarPosition);
+              return (
+                <div
+                  key={member.id}
+                  className="content-visibility-auto group overflow-hidden rounded-card bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
+                  {/* 프로필 이미지 영역 */}
+                  <div className="aspect-[312/275] w-full overflow-hidden bg-gray-200">
+                    {member.avatarUrl && !failedImages.has(member.id) ? (
+                      <img
+                        src={member.avatarUrl}
+                        alt={member.name}
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                        style={avatarPosition ? { objectPosition: avatarPosition } : undefined}
+                        onError={() =>
+                          setFailedImages((prev) => {
+                            const next = new Set(prev);
+                            next.add(member.id);
+                            return next;
+                          })
+                        }
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/40">
+                        <span className="text-5xl text-muruk-green-muted/30">🌿</span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* 정보 영역 */}
-              <div className="p-4 text-center sm:p-5">
-                {/* 이름 */}
-                <h3 className="text-balance-safe text-xl font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
+                  {/* 정보 영역 */}
+                  <div className="p-4 text-center sm:p-5">
+                    {/* 이름 */}
+                    <h3 className="text-balance-safe text-xl font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
 
-                {/* 역할 색상 라인 */}
-                <div className="mx-auto mt-2 h-[2px] w-12 rounded-full" style={{ backgroundColor: lineColor }} />
+                    {/* 역할 색상 라인 */}
+                    <div className="mx-auto mt-2 h-[2px] w-12 rounded-full" style={{ backgroundColor: lineColor }} />
 
-                {/* 역할 & 학과 & 상태 메시지 */}
-                <div className="mt-3 space-y-0.5 text-xs text-gray-600 sm:text-sm">
-                  {member.role && <p>{member.role}</p>}
-                  {(member.schoolGeneration || member.className) && (
-                    <p>
-                      {member.schoolGeneration ?? ''}
-                      {member.schoolGeneration && member.className ? ' ' : ''}
-                      {member.className ?? ''}
-                    </p>
-                  )}
-                  {member.statusMessage && (
-                    <p className="text-balance-safe break-words whitespace-pre-line leading-relaxed text-gray-500">
-                      {member.statusMessage}
-                    </p>
-                  )}
+                    {/* 역할 & 학과 & 상태 메시지 */}
+                    <div className="mt-3 space-y-0.5 text-xs text-gray-600 sm:text-sm">
+                      {member.role && <p>{member.role}</p>}
+                      {(member.schoolGeneration || member.className) && (
+                        <p>
+                          {member.schoolGeneration ?? ''}
+                          {member.schoolGeneration && member.className ? ' ' : ''}
+                          {member.className ?? ''}
+                        </p>
+                      )}
+                      {member.statusMessage && (
+                        <p className="text-balance-safe break-words whitespace-pre-line leading-relaxed text-gray-500">
+                          {member.statusMessage}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }

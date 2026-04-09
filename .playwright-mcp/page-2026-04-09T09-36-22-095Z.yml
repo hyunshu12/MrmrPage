@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "무럭무럭 로고" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - img "무럭무럭 로고" [ref=e5]
+      - list [ref=e6]:
+        - listitem [ref=e7]:
+          - link "홈" [ref=e8] [cursor=pointer]:
+            - /url: /
+        - listitem [ref=e9]:
+          - link "프로젝트" [ref=e10] [cursor=pointer]:
+            - /url: /projects
+        - listitem [ref=e11]:
+          - link "업적" [ref=e12] [cursor=pointer]:
+            - /url: /achievements
+        - listitem [ref=e13]:
+          - link "멤버소개" [ref=e14] [cursor=pointer]:
+            - /url: /members
+        - listitem [ref=e15]:
+          - link "FAQ" [ref=e16] [cursor=pointer]:
+            - /url: /faq
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - img "멤버 소개 대표 이미지" [ref=e20]
+        - generic [ref=e22]:
+          - paragraph [ref=e23]: MEMBERS
+          - heading "함께하는 멤버들" [level=1] [ref=e24]
+          - paragraph [ref=e25]: 기획, 디자인, 개발이 함께 모여 더 나은 결과를 만듭니다.
+        - link "멤버 소개 내용으로 이동" [ref=e26] [cursor=pointer]:
+          - /url: "#members-content"
+          - img [ref=e27]
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - button "3기" [ref=e32]
+          - button "2기" [ref=e33]
+          - button "1기" [ref=e34]
+        - generic [ref=e35]:
+          - generic [ref=e36]:
+            - img "김도윤" [ref=e38]
+            - generic [ref=e39]:
+              - heading "김도윤" [level=3] [ref=e40]
+              - generic [ref=e42]:
+                - paragraph [ref=e43]: Developer
+                - paragraph [ref=e44]: 25기 E-비즈니스과
+                - paragraph [ref=e45]: 시크남 시골에서 크는 남자
+          - generic [ref=e46]:
+            - generic [ref=e49]: 🌿
+            - generic [ref=e50]:
+              - heading "성유준" [level=3] [ref=e51]
+              - generic [ref=e53]:
+                - paragraph [ref=e54]: Developer
+                - paragraph [ref=e55]: 25기 E-비즈니스과
+          - generic [ref=e56]:
+            - img "윤수현" [ref=e58]
+            - generic [ref=e59]:
+              - heading "윤수현" [level=3] [ref=e60]
+              - generic [ref=e62]:
+                - paragraph [ref=e63]: Project Manager
+                - paragraph [ref=e64]: 25기 E-비즈니스과
+                - paragraph [ref=e65]: "@y.shzn"
+          - generic [ref=e66]:
+            - img "임한나" [ref=e68]
+            - generic [ref=e69]:
+              - heading "임한나" [level=3] [ref=e70]
+              - generic [ref=e72]:
+                - paragraph [ref=e73]: Project Manager
+                - paragraph [ref=e74]: 25기 E-비즈니스과
+                - paragraph [ref=e75]: 봄 사랑 벚꽃 럭무
+          - generic [ref=e76]:
+            - img "김예성" [ref=e78]
+            - generic [ref=e79]:
+              - heading "김예성" [level=3] [ref=e80]
+              - generic [ref=e82]:
+                - paragraph [ref=e83]: Designer
+                - paragraph [ref=e84]: 25기 디지털콘텐츠과
+                - paragraph [ref=e85]: 행무행무♡
+          - generic [ref=e86]:
+            - img "신해인" [ref=e88]
+            - generic [ref=e89]:
+              - heading "신해인" [level=3] [ref=e90]
+              - generic [ref=e92]:
+                - paragraph [ref=e93]: Project Manager
+                - paragraph [ref=e94]: 25기 해킹방어과
+                - paragraph [ref=e95]: 무럭무럭의 비료가 되겠습니다
+          - generic [ref=e96]:
+            - img "조경훈" [ref=e98]
+            - generic [ref=e99]:
+              - heading "조경훈" [level=3] [ref=e100]
+              - generic [ref=e102]:
+                - paragraph [ref=e103]: Project Manager
+                - paragraph [ref=e104]: 25기 해킹방어과
+                - paragraph [ref=e105]: 비건1일차
+  - contentinfo [ref=e106]:
+    - generic [ref=e107]:
+      - navigation "소셜 미디어 링크"
+      - paragraph [ref=e108]: © 2026 무럭무럭 | MRMR. All rights reserved.
+      - paragraph [ref=e109]: PLANT US RAISE EARTH
+  - button "Open Next.js Dev Tools" [ref=e115] [cursor=pointer]:
+    - img [ref=e116]
+  - alert [ref=e119]

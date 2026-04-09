@@ -41,6 +41,7 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const activeYear = selectedYear ?? yearKeys[0] ?? null;
   const filteredProjects = activeYear ? (projectsByYear[activeYear] ?? []) : [];
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   return (
     <div className="min-h-screen bg-gradient-projects">
@@ -131,11 +132,18 @@ export default function ProjectsPageClient({ projects }: ProjectsPageClientProps
                 key={project.id}
                 className="content-visibility-auto group flex flex-col overflow-hidden rounded-card bg-muruk-card-bg shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row">
                 <div className="w-full shrink-0 overflow-hidden bg-muruk-green-lightest/30 sm:w-2/5">
-                  {project.logoUrl ? (
+                  {project.logoUrl && !failedImages.has(project.id) ? (
                     <img
                       src={project.logoUrl}
                       alt={project.name}
                       className="h-full w-full rounded-[30px] object-cover p-4 sm:rounded-[53px]"
+                      onError={() =>
+                        setFailedImages((prev) => {
+                          const next = new Set(prev);
+                          next.add(project.id);
+                          return next;
+                        })
+                      }
                     />
                   ) : (
                     <div className="flex h-full min-h-[200px] w-full items-center justify-center">
