@@ -62,7 +62,8 @@ export default function Header() {
         isHeroZone
           ? 'border-white/1 bg-white/1 shadow-[0_8px_22px_rgba(0,0,0,0.14)]'
           : 'border-white/45 bg-white/32 shadow-[0_10px_24px_rgba(0,0,0,0.08)]'
-      }`}>
+      }`}
+    >
       <nav className="mx-auto flex max-w-[1920px] items-center justify-between px-4 py-3 sm:px-6 md:px-10 md:py-4 lg:px-16">
         {/* 무럭무럭 로고 */}
         <Link href="/" className="flex items-center">
@@ -86,7 +87,8 @@ export default function Header() {
                   href={item.href}
                   className={`text-base font-semibold transition-colors lg:text-lg ${
                     isActive ? activeLinkClass : inactiveLinkClass
-                  }`}>
+                  }`}
+                >
                   {item.label}
                 </Link>
               </li>
@@ -104,15 +106,10 @@ export default function Header() {
             isHeroZone
               ? 'border-white/35 bg-black/20 text-white'
               : 'border-muruk-green-border/35 bg-white/70 text-muruk-green-darker'
-          }`}>
+          }`}
+        >
           <span className="sr-only">모바일 메뉴</span>
-          <svg
-            aria-hidden="true"
-            focusable="false"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor">
+          <svg aria-hidden="true" focusable="false" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isMobileMenuOpen ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
@@ -125,8 +122,11 @@ export default function Header() {
       {isMobileMenuOpen && (
         <div
           className={`border-t px-4 pb-4 pt-2 md:hidden ${
-            isHeroZone ? 'border-white/20 bg-black/35' : 'border-muruk-green-border/20 bg-white/90'
-          }`}>
+            isHeroZone
+              ? 'border-white/20 bg-black/35'
+              : 'border-muruk-green-border/20 bg-white/90'
+          }`}
+        >
           <ul className="space-y-1">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
@@ -143,7 +143,8 @@ export default function Header() {
                         : isActive
                           ? 'bg-muruk-green-sage/15 text-muruk-green-darker'
                           : 'text-muruk-green-text/80 hover:bg-muruk-card-bg hover:text-muruk-green-darker'
-                    }`}>
+                    }`}
+                  >
                     {item.label}
                   </Link>
                 </li>
