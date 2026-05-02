@@ -1,7 +1,9 @@
 'use client';
 
-import { useAchievements } from '@/hooks/useApi';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import NotionImage from '@/components/NotionImage';
+import { achievementsQueryKey, useAchievements } from '@/hooks/useApi';
+import { useSnapScroll } from '@/hooks/useSnapScroll';
+import { useMemo, useRef, useState } from 'react';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -15,9 +17,7 @@ export default function AchievementsPage() {
   const achievements = achievementsQuery.data ?? [];
   const error = achievementsQuery.isError;
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
-  const lockRef = useRef(false);
-  const wheelDeltaAccumRef = useRef(0);
-  const wheelResetTimerRef = useRef<number | null>(null);
+  useSnapScroll(sectionRefs, true);
 
   // 연도별 그룹핑
   const { yearKeys, achievementsByYear } = useMemo(() => {
@@ -44,111 +44,13 @@ export default function AchievementsPage() {
   const activeYear = selectedYear ?? yearKeys[0] ?? null;
   const filteredAchievements = activeYear ? (achievementsByYear[activeYear] ?? []) : [];
 
-  useEffect(() => {
-    const shouldUseSnap = window.matchMedia('(pointer:fine)').matches && window.innerWidth >= 1024;
-    if (!shouldUseSnap) return;
-
-    const sections = sectionRefs.current.filter(Boolean) as HTMLElement[];
-    if (sections.length === 0) return;
-
-    const findClosestSection = () => {
-      const y = window.scrollY + window.innerHeight * 0.35;
-      let closest = 0;
-      let minDist = Number.POSITIVE_INFINITY;
-      for (let i = 0; i < sections.length; i += 1) {
-        const dist = Math.abs(sections[i].offsetTop - y);
-        if (dist < minDist) {
-          minDist = dist;
-          closest = i;
-        }
-      }
-      return closest;
-    };
-
-    const handleWheel = (event: WheelEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (target?.closest('a, button, input, textarea, select')) return;
-      // 자연스러운 사용성을 위해 히어로 섹션에서만 스냅 전환을 사용한다.
-      if (findClosestSection() > 0) return;
-      if (Math.abs(event.deltaY) < 1.5) return;
-      if (lockRef.current) {
-        event.preventDefault();
-        return;
-      }
-
-      const deltaUnit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1;
-      const normalizedDelta = event.deltaY * deltaUnit;
-
-      if (wheelResetTimerRef.current !== null) {
-        window.clearTimeout(wheelResetTimerRef.current);
-      }
-      if (wheelDeltaAccumRef.current !== 0 && Math.sign(wheelDeltaAccumRef.current) !== Math.sign(normalizedDelta)) {
-        wheelDeltaAccumRef.current = 0;
-      }
-      wheelDeltaAccumRef.current += normalizedDelta;
-      wheelResetTimerRef.current = window.setTimeout(() => {
-        wheelDeltaAccumRef.current = 0;
-      }, 320);
-
-      const WHEEL_TRIGGER_THRESHOLD = 90;
-      if (Math.abs(wheelDeltaAccumRef.current) < WHEEL_TRIGGER_THRESHOLD) return;
-
-      const current = findClosestSection();
-      const direction = wheelDeltaAccumRef.current > 0 ? 1 : -1;
-      const next = Math.min(Math.max(current + direction, 0), sections.length - 1);
-      if (next === current) return;
-
-      wheelDeltaAccumRef.current = 0;
-      lockRef.current = true;
-      event.preventDefault();
-      sections[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.setTimeout(() => {
-        lockRef.current = false;
-      }, 700);
-    };
-
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (!['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Space'].includes(event.key)) return;
-      // 콘텐츠 섹션에서는 기본 키 스크롤을 유지한다.
-      if (findClosestSection() > 0) return;
-      if (lockRef.current) {
-        event.preventDefault();
-        return;
-      }
-      const current = findClosestSection();
-      let next = current;
-      if (event.key === 'ArrowDown' || event.key === 'PageDown' || event.key === 'Space') next = current + 1;
-      if (event.key === 'ArrowUp' || event.key === 'PageUp') next = current - 1;
-      next = Math.min(Math.max(next, 0), sections.length - 1);
-      if (next === current) return;
-
-      lockRef.current = true;
-      event.preventDefault();
-      sections[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
-      window.setTimeout(() => {
-        lockRef.current = false;
-      }, 700);
-    };
-
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('keydown', handleKeydown);
-    return () => {
-      window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('keydown', handleKeydown);
-      if (wheelResetTimerRef.current !== null) {
-        window.clearTimeout(wheelResetTimerRef.current);
-      }
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-gradient-achievements">
       <section
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative min-h-[100svh] overflow-hidden"
-      >
+        className="relative min-h-[100svh] overflow-hidden">
         <img
           src="/archiveImage.png"
           alt="업적 소개 대표 이미지"
@@ -172,16 +74,15 @@ export default function AchievementsPage() {
         <a
           href="#achievements-content"
           aria-label="업적 내용으로 이동"
-          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90"
-        >
+          className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-white/75 transition-opacity hover:opacity-90">
+          <span className="sr-only">업적 내용으로 이동</span>
           <svg
             aria-hidden="true"
             focusable="false"
             className="mx-auto h-7 w-7"
             fill="none"
             viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+            stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
           </svg>
         </a>
@@ -192,8 +93,7 @@ export default function AchievementsPage() {
         ref={(el) => {
           sectionRefs.current[1] = el;
         }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20"
-      >
+        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
         {/* 연도 탭 */}
         {yearKeys.length > 0 && (
           <div className="mb-12 flex flex-wrap gap-2.5 pb-2 sm:gap-3">
@@ -208,8 +108,7 @@ export default function AchievementsPage() {
                     isActive
                       ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
                       : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-                  }`}
-                >
+                  }`}>
                   {year}
                 </button>
               );
@@ -233,19 +132,24 @@ export default function AchievementsPage() {
 
         {/* 업적 카드 그리드 */}
         {filteredAchievements.length > 0 && (
-          <div key={activeYear ?? 'all'} className="reveal-up grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12">
+          <div
+            key={activeYear ?? 'all'}
+            className="reveal-up grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12">
             {filteredAchievements.map((achievement) => (
               <div
                 key={achievement.id}
-                className="content-visibility-auto group flex flex-col overflow-hidden rounded-[20px] border border-muruk-green-primary bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl"
-              >
+                className="content-visibility-auto group flex flex-col overflow-hidden rounded-[20px] border border-muruk-green-primary bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl">
                 {/* 썸네일 이미지 */}
                 <div className="aspect-[2/1] w-full shrink-0 overflow-hidden bg-gray-200">
                   {achievement.thumbnailUrl ? (
-                    <img
+                    <NotionImage
                       src={achievement.thumbnailUrl}
                       alt={achievement.name}
+                      width={800}
+                      height={400}
+                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                      invalidateQueryKey={achievementsQueryKey}
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/30">
@@ -272,9 +176,7 @@ export default function AchievementsPage() {
                       </div>
                     </div>
                     {achievement.award && (
-                      <span className="shrink-0 text-2xl font-bold text-muruk-green-award">
-                        {achievement.award}
-                      </span>
+                      <span className="shrink-0 text-2xl font-bold text-muruk-green-award">{achievement.award}</span>
                     )}
                   </div>
                 </div>

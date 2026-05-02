@@ -1,30 +1,20 @@
 import { env } from '@/lib/env';
-import { type Achievement, achievementArraySchema } from '@/types/achievement';
-import type { PageObjectResponse } from '@notionhq/client/build/src/api-endpoints';
+import { type Achievement, achievementSchema } from '@/types/achievement';
 import { getNotionClient } from '../client';
 import { mapPageToAchievement } from '../mappers';
-import { createOrderAscSort, createPublishedFilter } from '../queries';
+import { createOrderAscSort, createPublishedFilter, queryAllPages } from '../queries';
+import { validatePerRow } from '../safe-validate';
 
 export async function getPublishedAchievements(): Promise<Achievement[]> {
   const notion = getNotionClient();
 
-  const response = await notion.databases.query({
+  const pages = await queryAllPages(notion, {
     database_id: env.NOTION_ACHIEVEMENTS_DB_ID,
     filter: createPublishedFilter(),
     sorts: createOrderAscSort(),
   });
 
-  const achievements = response.results
-    .filter((page): page is PageObjectResponse => page.object === 'page' && 'properties' in page)
-    .map(mapPageToAchievement);
-
-  const parsed = achievementArraySchema.safeParse(achievements);
-  if (!parsed.success) {
-    console.error('Achievements validation failed:', parsed.error.flatten());
-    throw new Error('Failed to validate achievements data');
-  }
-
-  return parsed.data.filter((a) => a.name.trim().length > 0);
+  const mapped = pages.map(mapPageToAchievement);
+  const validated = validatePerRow(mapped, achievementSchema, 'achievements');
+  return validated.filter((a) => a.name.trim().length > 0);
 }
-
-// getAchievementBySlug removed: Achievements DB has no Slug column.
