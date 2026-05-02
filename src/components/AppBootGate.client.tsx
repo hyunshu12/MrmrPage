@@ -11,9 +11,25 @@ import { useEffect, useState } from 'react';
 const HERO_IMAGE_URLS = ['/memberImage.png', '/projectImage.png', '/archiveImage.png'] as const;
 const MAX_CONTENT_IMAGE_PRELOAD = 80;
 const SPLASH_TIMEOUT_MS = 8000;
+const NEXT_IMAGE_PRELOAD_WIDTHS = [1080, 1920] as const;
+const NEXT_IMAGE_QUALITY = 75;
 
 function uniqueNonEmpty(urls: Array<string | null | undefined>): string[] {
   return Array.from(new Set(urls.filter((u): u is string => typeof u === 'string' && u.length > 0)));
+}
+
+function buildNextImageUrl(src: string, width: number, quality = NEXT_IMAGE_QUALITY): string {
+  return `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+}
+
+function expandToTransformedUrls(rawUrls: string[]): string[] {
+  const expanded: string[] = [];
+  for (const url of rawUrls) {
+    for (const width of NEXT_IMAGE_PRELOAD_WIDTHS) {
+      expanded.push(buildNextImageUrl(url, width));
+    }
+  }
+  return expanded;
 }
 
 function preloadImages(urls: string[]): Promise<void> {
@@ -107,13 +123,14 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
 
       if (result) {
         const [members, projects, achievements] = result;
-        const contentUrls = uniqueNonEmpty([
+        const contentRawUrls = uniqueNonEmpty([
           ...members.map((m) => m.avatarUrl),
           ...projects.map((p) => p.logoUrl),
           ...achievements.map((a) => a.thumbnailUrl),
         ]).slice(0, MAX_CONTENT_IMAGE_PRELOAD);
+        const contentTransformedUrls = expandToTransformedUrls(contentRawUrls);
         const remainingMs = Math.max(SPLASH_TIMEOUT_MS - 1000, 1000);
-        await withTimeout(Promise.all([preloadImages(contentUrls), heroPromise]), remainingMs);
+        await withTimeout(Promise.all([preloadImages(contentTransformedUrls), heroPromise]), remainingMs);
       }
 
       if (cancelled) return;
@@ -138,21 +155,22 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
         ]);
 
         if (cancelled) return;
-        const urls = uniqueNonEmpty([
+        const rawUrls = uniqueNonEmpty([
           ...members.map((m) => m.avatarUrl),
           ...projects.map((p) => p.logoUrl),
           ...achievements.map((a) => a.thumbnailUrl),
         ]).slice(0, MAX_CONTENT_IMAGE_PRELOAD);
+        const transformedUrls = expandToTransformedUrls(rawUrls);
 
         const requestIdleCallbackFn =
           'requestIdleCallback' in window ? window.requestIdleCallback.bind(window) : undefined;
         if (requestIdleCallbackFn) {
           requestIdleCallbackFn(() => {
-            void preloadImages(urls);
+            void preloadImages(transformedUrls);
           });
         } else {
           window.setTimeout(() => {
-            void preloadImages(urls);
+            void preloadImages(transformedUrls);
           }, 0);
         }
       } catch (e) {

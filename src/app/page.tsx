@@ -110,6 +110,7 @@ export default function HomePage() {
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 className="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 invalidateQueryKey={projectsQueryKey}
+                priority
               />
             ) : (
               <div className="flex aspect-[16/10] items-center justify-center bg-muruk-green-lightest/40 text-5xl text-muruk-green-muted/40">
@@ -181,6 +182,7 @@ export default function HomePage() {
                 sizes="(min-width: 1024px) 50vw, 100vw"
                 className="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                 invalidateQueryKey={achievementsQueryKey}
+                priority
               />
             ) : (
               <div className="flex aspect-[16/10] items-center justify-center bg-muruk-green-lightest/30 text-5xl text-muruk-green-muted/40">
