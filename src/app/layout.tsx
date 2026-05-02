@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import type { ReactNode } from 'react';
 import './globals.css';
 import AppBootGate from '@/components/AppBootGate.client';
@@ -8,8 +9,7 @@ import QueryClientProvider from '@/providers/QueryClientProvider';
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.mrmr.kr';
 const SITE_NAME = '무럭무럭 | MRMR';
-const SITE_DESCRIPTION =
-  '한국디지털미디어고등학교 스마트팜 동아리 무럭무럭 공식 웹사이트.';
+const SITE_DESCRIPTION = '한국디지털미디어고등학교 스마트팜 동아리 무럭무럭 공식 웹사이트.';
 const SITE_KEYWORDS = [
   '무럭무럭',
   '디미고 무럭무럭',
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: '/logo.png',
+        url: `${SITE_URL}/logo.png`,
         width: 1200,
         height: 1200,
         alt: '무럭무럭 로고',
@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    images: ['/logo.png'],
+    images: [`${SITE_URL}/logo.png`],
   },
   alternates: {
     canonical: '/',
@@ -124,11 +124,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="ko">
       <head>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }} />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
-        />
+        <Script id="ld-website" type="application/ld+json" strategy="beforeInteractive">
+          {JSON.stringify(websiteJsonLd)}
+        </Script>
+        <Script id="ld-organization" type="application/ld+json" strategy="beforeInteractive">
+          {JSON.stringify(organizationJsonLd)}
+        </Script>
       </head>
       <body className="flex min-h-screen flex-col font-crimson">
         <QueryClientProvider>

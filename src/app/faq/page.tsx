@@ -26,11 +26,13 @@ const faqs = [
   },
   {
     question: '무럭무럭은 어떤 분위기인가요?',
-    answer: '무럭무럭은 디미고에서 동아리원들끼리 가장 친밀하고 화목한 분위기를 자랑하는 동아리입니다. 열정적이고 친근한 선배들과 함께 열심히 활동하며 성과를 만들어나갈 수 있습니다. 함께 즐겁게 활동하며 소중한 고교 시절의 추억을 쌓고 싶은 분들은 지원하세요!!',
+    answer:
+      '무럭무럭은 디미고에서 동아리원들끼리 가장 친밀하고 화목한 분위기를 자랑하는 동아리입니다. 열정적이고 친근한 선배들과 함께 열심히 활동하며 성과를 만들어나갈 수 있습니다. 함께 즐겁게 활동하며 소중한 고교 시절의 추억을 쌓고 싶은 분들은 지원하세요!!',
   },
   {
     question: '포트폴리오 제출 필수인가요?',
-    answer: '제출이 필수는 아니나 포트폴리오는 본인의 능력과 성과를 더 명확히 보여줄 수 있는 좋은 기회입니다. 본인의 역량을 더 어필하고 싶은 분들은 포트폴리오를 제출해 주세요.',
+    answer:
+      '제출이 필수는 아니나 포트폴리오는 본인의 능력과 성과를 더 명확히 보여줄 수 있는 좋은 기회입니다. 본인의 역량을 더 어필하고 싶은 분들은 포트폴리오를 제출해 주세요.',
   },
 ];
 
@@ -58,31 +60,29 @@ export default function FaqPage() {
             return (
               <article
                 key={faq.question}
-                className="overflow-hidden rounded-3xl border border-muruk-green-border/35 bg-white/90 shadow-sm backdrop-blur-sm"
-              >
+                className="overflow-hidden rounded-3xl border border-muruk-green-border/35 bg-white/90 shadow-sm backdrop-blur-sm">
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? -1 : index)}
                   aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-muruk-card-bg/70 sm:gap-4 sm:px-6 sm:py-5"
-                >
+                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-muruk-card-bg/70 sm:gap-4 sm:px-6 sm:py-5">
                   <h2 className="text-balance-safe text-base font-semibold text-muruk-green-darker sm:text-lg md:text-xl">
                     {faq.question}
                   </h2>
-                  <span className="text-xl leading-none text-muruk-green-primary sm:text-2xl">{isOpen ? '−' : '+'}</span>
+                  <span className="text-xl leading-none text-muruk-green-primary sm:text-2xl">
+                    {isOpen ? '−' : '+'}
+                  </span>
                 </button>
 
                 <div
                   className={`grid overflow-hidden transition-all duration-500 ease-out ${
                     isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-90'
-                  }`}
-                >
+                  }`}>
                   <div className="overflow-hidden">
                     <div
                       className={`border-t border-muruk-green-border/20 px-4 py-4 transition-all duration-500 ease-out sm:px-6 sm:py-5 ${
                         isOpen ? 'translate-y-0 opacity-100' : '-translate-y-1 opacity-0'
-                      }`}
-                    >
+                      }`}>
                       <p className="text-balance-safe text-sm leading-relaxed text-muruk-green-text/90 sm:text-base">
                         {faq.answer}
                       </p>

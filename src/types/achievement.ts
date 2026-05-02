@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const achievementSchema = z.object({
   id: z.string(),
   name: z.string(),
-  year: z.string().nullable().optional(),
+  year: z.string().nullable(),
   award: z.string().nullable(),
   team: z.string().nullable(),
   members: z.array(z.string()),
