@@ -3,6 +3,7 @@
 import MembersTabs from '@/components/members/MembersTabs.client';
 import { useMembers } from '@/hooks/useApi';
 import { useSnapScroll } from '@/hooks/useSnapScroll';
+import Image from 'next/image';
 import { useRef } from 'react';
 
 export default function MembersPage() {
@@ -19,13 +20,14 @@ export default function MembersPage() {
           sectionRefs.current[0] = el;
         }}
         className="relative min-h-[100svh] overflow-hidden">
-        <img
+        <Image
           src="/memberImage.png"
           alt="멤버 소개 대표 이미지"
-          className="absolute inset-0 h-full w-full object-cover object-center"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
+          fill
+          priority
+          sizes="100vw"
+          quality={75}
+          className="object-cover object-center"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">

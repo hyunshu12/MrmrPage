@@ -9,9 +9,9 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 
 const HERO_IMAGE_URLS = ['/memberImage.png', '/projectImage.png', '/archiveImage.png'] as const;
-const MAX_CONTENT_IMAGE_PRELOAD = 80;
+const MAX_CONTENT_IMAGE_PRELOAD = 20;
 const SPLASH_TIMEOUT_MS = 8000;
-const NEXT_IMAGE_PRELOAD_WIDTHS = [1080, 1920] as const;
+const NEXT_IMAGE_PRELOAD_WIDTHS = [1920] as const;
 const NEXT_IMAGE_QUALITY = 75;
 
 function uniqueNonEmpty(urls: Array<string | null | undefined>): string[] {
@@ -40,9 +40,17 @@ function preloadImages(urls: string[]): Promise<void> {
       (url) =>
         new Promise<void>((resolve) => {
           const img = new Image();
-          img.onload = () => resolve();
           img.onerror = () => resolve();
-          img.src = url;
+          if (typeof img.decode === 'function') {
+            img.src = url;
+            img
+              .decode()
+              .then(() => resolve())
+              .catch(() => resolve());
+          } else {
+            img.onload = () => resolve();
+            img.src = url;
+          }
         }),
     ),
   ).then(() => undefined);
@@ -117,7 +125,8 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
         }),
       ]);
 
-      const heroPromise = preloadImages([...HERO_IMAGE_URLS]);
+      // hero를 페이지의 next/image와 동일한 변환 URL로 프리로드 (캐시 적중)
+      const heroPromise = preloadImages(expandToTransformedUrls([...HERO_IMAGE_URLS]));
       const result = await withTimeout(dataPromise, SPLASH_TIMEOUT_MS);
       if (cancelled) return;
 
@@ -130,7 +139,14 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
         ]).slice(0, MAX_CONTENT_IMAGE_PRELOAD);
         const contentTransformedUrls = expandToTransformedUrls(contentRawUrls);
         const remainingMs = Math.max(SPLASH_TIMEOUT_MS - 1000, 1000);
-        await withTimeout(Promise.all([preloadImages(contentTransformedUrls), heroPromise]), remainingMs);
+        // hero 우선 보장: hero 완료 후 콘텐츠 시작 (잔여 시간 내 둘 다 완료 시도)
+        await withTimeout(
+          heroPromise.then(() => preloadImages(contentTransformedUrls)),
+          remainingMs,
+        );
+      } else {
+        // 데이터가 timeout 안에 안 와도 hero만이라도 1초 추가 시도
+        await withTimeout(heroPromise, 1000);
       }
 
       if (cancelled) return;
@@ -160,7 +176,8 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
           ...projects.map((p) => p.logoUrl),
           ...achievements.map((a) => a.thumbnailUrl),
         ]).slice(0, MAX_CONTENT_IMAGE_PRELOAD);
-        const transformedUrls = expandToTransformedUrls(rawUrls);
+        const heroTransformedUrls = expandToTransformedUrls([...HERO_IMAGE_URLS]);
+        const transformedUrls = [...heroTransformedUrls, ...expandToTransformedUrls(rawUrls)];
 
         const requestIdleCallbackFn =
           'requestIdleCallback' in window ? window.requestIdleCallback.bind(window) : undefined;
