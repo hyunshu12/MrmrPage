@@ -2,7 +2,6 @@
 
 import NotionImage from '@/components/NotionImage';
 import { achievementsQueryKey, useAchievements } from '@/hooks/useApi';
-import { useImageLoaded } from '@/hooks/useImageLoaded';
 import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { ARCHIVE_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
@@ -20,8 +19,6 @@ export default function AchievementsPage() {
   const achievements = achievementsQuery.data ?? [];
   const error = achievementsQuery.isError;
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
-  const heroImgRef = useRef<HTMLImageElement | null>(null);
-  const heroLoaded = useImageLoaded(heroImgRef);
   useSnapScroll(sectionRefs, true);
 
   // 연도별 그룹핑
@@ -63,7 +60,6 @@ export default function AchievementsPage() {
           backgroundPosition: 'center',
         }}>
         <Image
-          ref={heroImgRef}
           src="/archiveImage.png"
           alt="업적 소개 대표 이미지"
           fill
@@ -72,10 +68,7 @@ export default function AchievementsPage() {
           quality={75}
           className="object-cover object-center"
         />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62"
-          style={{ opacity: heroLoaded ? 1 : 0, transition: 'opacity 300ms ease-out' }}
-        />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
           <div className="rounded-2xl bg-black/18 px-5 py-5 backdrop-blur-[2px] sm:px-8 sm:py-6">
             <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">ACHIEVEMENT</p>
