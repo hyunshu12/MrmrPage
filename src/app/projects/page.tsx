@@ -2,10 +2,11 @@
 
 import NotionImage from '@/components/NotionImage';
 import { projectsQueryKey, useProjects } from '@/hooks/useApi';
+import { useImageLoaded } from '@/hooks/useImageLoaded';
 import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { PROJECT_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -20,11 +21,8 @@ export default function ProjectsPage() {
   const error = projectsQuery.isError;
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
   const heroImgRef = useRef<HTMLImageElement | null>(null);
-  const [heroLoaded, setHeroLoaded] = useState(false);
+  const heroLoaded = useImageLoaded(heroImgRef);
   useSnapScroll(sectionRefs, true);
-  useEffect(() => {
-    if (heroImgRef.current?.complete) setHeroLoaded(true);
-  }, []);
 
   // 연도별 그룹핑
   const { yearKeys, projectsByYear } = useMemo(() => {
@@ -74,7 +72,6 @@ export default function ProjectsPage() {
           quality={75}
           className="scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
-          onLoad={() => setHeroLoaded(true)}
         />
         <div
           className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62 transition-opacity duration-300 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}

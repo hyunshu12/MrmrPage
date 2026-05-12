@@ -2,10 +2,11 @@
 
 import MembersTabs from '@/components/members/MembersTabs.client';
 import { useMembers } from '@/hooks/useApi';
+import { useImageLoaded } from '@/hooks/useImageLoaded';
 import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { MEMBER_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
 export default function MembersPage() {
   const membersQuery = useMembers();
@@ -13,11 +14,8 @@ export default function MembersPage() {
   const error = membersQuery.isError;
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
   const heroImgRef = useRef<HTMLImageElement | null>(null);
-  const [heroLoaded, setHeroLoaded] = useState(false);
+  const heroLoaded = useImageLoaded(heroImgRef);
   useSnapScroll(sectionRefs, true);
-  useEffect(() => {
-    if (heroImgRef.current?.complete) setHeroLoaded(true);
-  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-members">
@@ -41,7 +39,6 @@ export default function MembersPage() {
           sizes="100vw"
           quality={75}
           className="object-cover object-center"
-          onLoad={() => setHeroLoaded(true)}
         />
         <div
           className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62 transition-opacity duration-300 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
