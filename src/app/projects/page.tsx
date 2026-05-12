@@ -3,8 +3,9 @@
 import NotionImage from '@/components/NotionImage';
 import { projectsQueryKey, useProjects } from '@/hooks/useApi';
 import { useSnapScroll } from '@/hooks/useSnapScroll';
+import { PROJECT_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -18,7 +19,12 @@ export default function ProjectsPage() {
   const projects = projectsQuery.data ?? [];
   const error = projectsQuery.isError;
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
+  const heroImgRef = useRef<HTMLImageElement | null>(null);
+  const [heroLoaded, setHeroLoaded] = useState(false);
   useSnapScroll(sectionRefs, true);
+  useEffect(() => {
+    if (heroImgRef.current?.complete) setHeroLoaded(true);
+  }, []);
 
   // 연도별 그룹핑
   const { yearKeys, projectsByYear } = useMemo(() => {
@@ -51,8 +57,15 @@ export default function ProjectsPage() {
         ref={(el) => {
           sectionRefs.current[0] = el;
         }}
-        className="relative min-h-[100svh] overflow-hidden">
+        className="relative min-h-[100svh] overflow-hidden"
+        style={{
+          backgroundColor: PROJECT_HERO_PLACEHOLDER.dominantColor,
+          backgroundImage: `url(${PROJECT_HERO_PLACEHOLDER.blurDataUrl})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}>
         <Image
+          ref={heroImgRef}
           src="/projectImage.png"
           alt="프로젝트 소개 대표 이미지"
           fill
@@ -61,8 +74,11 @@ export default function ProjectsPage() {
           quality={75}
           className="scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
+          onLoad={() => setHeroLoaded(true)}
         />
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
+        <div
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62 transition-opacity duration-300 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
+        />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
           <div className="rounded-2xl bg-black/18 px-5 py-5 backdrop-blur-[2px] sm:px-8 sm:py-6">
             <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-white/90">PROJECT</p>
