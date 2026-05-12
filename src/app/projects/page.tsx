@@ -74,7 +74,8 @@ export default function ProjectsPage() {
           style={{ objectPosition: 'calc(50% - 48px) center' }}
         />
         <div
-          className={`pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62 transition-opacity duration-300 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62"
+          style={{ opacity: heroLoaded ? 1 : 0, transition: 'opacity 300ms ease-out' }}
         />
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center px-4 text-center">
           <div className="rounded-2xl bg-black/18 px-5 py-5 backdrop-blur-[2px] sm:px-8 sm:py-6">
