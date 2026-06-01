@@ -42,3 +42,12 @@ next-env.d.ts
 
 # private runbooks
 docs/private/*.md
+docs/private/**/*.md
+
+# AI tooling / session artifacts (do not track)
+# bkit plugin runtime: audit logs, snapshots, checkpoints, PDCA/session state
+/.bkit/
+# playwright-mcp dumps: console logs, page snapshots (.yml) and screenshots (.png)
+/.playwright-mcp/
+# local Claude Code config & worktree metadata (keep settings.json shareable via negation if desired)
+.claude/worktrees/

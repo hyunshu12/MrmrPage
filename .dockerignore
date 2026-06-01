@@ -1,0 +1,60 @@
+# ---- Dependencies & build artifacts (rebuilt inside the image) ----
+node_modules
+.next
+out
+build
+dist
+coverage
+tsconfig.tsbuildinfo
+
+# NOTE: bun.lock and package.json are intentionally NOT ignored —
+# the deps stage needs them for `bun install --frozen-lockfile`.
+
+# ---- Version control ----
+.git
+.gitignore
+.gitattributes
+
+# ---- Secrets & env (NEVER copy into the image) ----
+# `.env` + `.env.*` excludes the real secret-bearing .env.local.
+# The negations re-include example templates (this repo uses
+# `.env.local.example` per .gitignore) so they CAN ship if present.
+.env
+.env.*
+!.env.example
+!.env.local.example
+
+# ---- Tooling / agent state ----
+.bkit
+.playwright-mcp
+.claude
+.vscode
+.idea
+.vercel
+
+# ---- Docker / CI meta (not needed in the build context) ----
+Dockerfile
+.dockerignore
+docker-compose*.yml
+vercel.json
+
+# ---- Logs & debug ----
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+*.log
+
+# ---- Docs & planning files ----
+README.md
+docs
+*.md
+
+# ---- OS / editor cruft ----
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# ---- Stray local assets that aren't part of the app ----
+check-members.jpeg
