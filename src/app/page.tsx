@@ -1,12 +1,13 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
+import HalftoneHero from '@/components/hero/HalftoneHero.client';
+import HeroDock from '@/components/hero/HeroDock.client';
 import SectionDots from '@/components/home/SectionDots';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { achievementsQueryKey, projectsQueryKey, useAchievements, useProjects } from '@/hooks/useApi';
 import { useBoothAutoScroll } from '@/hooks/useBoothAutoScroll';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRef } from 'react';
 
@@ -25,7 +26,6 @@ export default function HomePage() {
   const achievements = achievementsQuery.data ?? [];
   const featuredProject = projects[0] ?? null;
   const featuredAchievement = achievements[0] ?? null;
-  const englishFontStyle = { fontFamily: "'Crimson Text', serif" } as const;
 
   // 섹션 스냅 자체는 CSS(.snap-section)가 맡는다. ref 는 인디케이터와 부스 자동 순환이 쓴다.
   const activeSection = useActiveSection(sectionRefs);
@@ -42,58 +42,15 @@ export default function HomePage() {
       <SectionDots labels={SECTION_LABELS} active={activeSection} onSelect={scrollToSection} />
 
       <div className="relative z-10">
-        {/* 첫 화면: 로고 + 태그라인 + 무럭무럭 (100vh, 스크롤 전 보이는 영역) */}
+        {/* 첫 화면: 하프톤 로고와 스마트팜 픽토그램, 아래쪽 바로가기 (components/hero) */}
         <section
           ref={(el) => {
             sectionRefs.current[0] = el;
           }}
-          className="snap-section relative flex min-h-[100svh] flex-col items-center justify-center px-4 text-center">
-          <div className="float-slower pointer-events-none absolute left-[8%] top-[20%] h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
-          <div className="drift-slow pointer-events-none absolute right-[10%] top-[30%] h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
-
-          {/* 로고 */}
-          <Image
-            src="/logo.png"
-            alt="무럭무럭 로고"
-            width={697}
-            height={697}
-            className="float-slow mx-auto h-40 w-40 object-contain sm:h-48 sm:w-48 lg:h-60 lg:w-60"
-            priority
-          />
-
-          {/* PLANT US / RAISE EARTH */}
-          <h2
-            className="reveal-up mt-5 text-lg font-semibold tracking-wide text-muruk-green-dark sm:mt-8 sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl"
-            style={englishFontStyle}>
-            PLANT US
-          </h2>
-          <h2
-            className="reveal-up delay-1 mt-1 text-lg font-semibold tracking-wide text-muruk-green-dark sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl"
-            style={englishFontStyle}>
-            RAISE EARTH
-          </h2>
-
-          {/* 무럭무럭 */}
-          <h1 className="reveal-up delay-2 mt-4 text-4xl font-bold leading-none text-muruk-green-darker sm:mt-6 sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl">
-            무럭무럭
-          </h1>
-
-          {/* 스크롤 안내 화살표 */}
-          <a
-            href="#home-intro"
-            aria-label="홈 소개 내용으로 이동"
-            className="absolute bottom-10 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80">
-            <span className="sr-only">홈 소개 내용으로 이동</span>
-            <svg
-              aria-hidden="true"
-              focusable="false"
-              className="mx-auto h-7 w-7"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </a>
+          className="snap-section relative min-h-[100svh] overflow-hidden">
+          <HalftoneHero />
+          <h1 className="sr-only">무럭무럭 — 한국디지털미디어고등학교 스마트팜 동아리 (PLANT US, RAISE EARTH)</h1>
+          <HeroDock />
         </section>
 
         {/* 스크롤 후 보이는 영역: 소개 + 요약 */}

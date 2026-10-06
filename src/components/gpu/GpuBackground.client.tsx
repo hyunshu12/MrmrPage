@@ -91,6 +91,24 @@ export default function GpuBackground() {
     };
   }, [dismissed, stateRef]);
 
+  // 첫 화면은 하프톤 히어로(components/hero)가 차지한다. 두 그림이 겹치면 산만하므로
+  // 배경은 히어로를 지나면서 서서히 나타난다.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (dismissed || !canvas) return;
+    const apply = () => {
+      const t = (window.scrollY - window.innerHeight * 0.25) / (window.innerHeight * 0.5);
+      canvas.style.opacity = String(Math.min(Math.max(t, 0), 1));
+    };
+    apply();
+    window.addEventListener('scroll', apply, { passive: true });
+    window.addEventListener('resize', apply);
+    return () => {
+      window.removeEventListener('scroll', apply);
+      window.removeEventListener('resize', apply);
+    };
+  }, [dismissed]);
+
   if (dismissed) return null;
 
   return (

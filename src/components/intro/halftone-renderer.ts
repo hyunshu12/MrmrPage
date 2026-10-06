@@ -7,19 +7,11 @@
  *   - 육각형: 새싹 밑동에서 퍼지는 파동을 따라 채워지고, 새싹은 크림색(로고의 흰 잎)으로 바뀐다.
  *   - 퇴장: 로고 중심에서 배경이 점으로 부서지며 구멍이 열린다(하프톤 와이프).
  *
- * 모양은 public/logo.png 에서 뽑은 거리장 텍스처(public/intro/logo-sdf.png)에서 읽는다.
- * 잎의 휘어짐·비대칭·언덕 호까지 로고 그대로다. 텍스처는 scripts/intro/gen-logo-sdf.py 가 만든다.
- *
- * 좌표: "마크 공간" 은 원점이 육각형 축·이미지 세로 중심이고, 단위 1 이 logo.png 가로 폭의 절반이다.
- * y 는 아래로 증가한다. 잎의 밑동·끝 좌표도 같은 이미지에서 쟀다.
+ * 로고 모양과 마크 공간 좌표계는 halftone/glsl.ts 를 따른다.
  */
 
-const VERTEX_SOURCE = `#version 300 es
-void main() {
-  // 화면을 덮는 삼각형 하나. 버퍼 없이 정점 번호로 만든다.
-  vec2 p = vec2((gl_VertexID << 1) & 2, gl_VertexID & 2);
-  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
-}`;
+import { createProgram, fitCanvas, uniformLocations, uploadDataTexture } from '@/components/halftone/gl';
+import { GLSL_COMMON, GLSL_LOGO } from '@/components/halftone/glsl';
 
 const FRAGMENT_SOURCE = `#version 300 es
 precision highp float;
@@ -36,7 +28,6 @@ uniform float uIdle;      // 배경 점 격자 0..1
 uniform float uRipple;    // 씨앗 파동 경과 시간(초), 음수면 없음
 uniform float uWipe;      // 퇴장 구멍 반지름 (CSS px)
 uniform float uMarkAlpha; // 마크 불투명도
-uniform sampler2D uSdf;   // 로고 거리장 아틀라스
 
 out vec4 outColor;
 
@@ -45,81 +36,10 @@ const vec3 BG_GLOW = vec3(0.176, 0.251, 0.137);
 const vec3 CREAM = vec3(1.0, 0.984, 0.886);      // #fffbe2
 const vec3 LEAF = vec3(0.408, 0.541, 0.275);     // #688a46
 const vec3 LIME = vec3(0.835, 0.902, 0.478);
-// 로고 그라데이션. logo.png 의 세로 위·가운데·아래에서 뽑은 색이다.
-const vec3 HEX_TOP = vec3(0.941, 0.882, 0.412);
-const vec3 HEX_MID = vec3(0.620, 0.682, 0.431);
-const vec3 HEX_BOT = vec3(0.267, 0.471, 0.467);
-const float HEX_Y_TOP = -0.967;
-const float HEX_Y_BOT = 0.968;
-
-// 텍스처 인코딩. gen-logo-sdf.py 의 DOMAIN · RANGE 와 같아야 한다.
-const float SDF_DOMAIN = 1.12;
-const float SDF_RANGE = 0.25;
-
-// 잎의 밑동(base)과 끝(tip). 성장은 밑동을 기준으로 커지고, 펼침은 밑동을 축으로 돈다.
-const vec2 TOP_BASE = vec2(0.007, 0.325);
-const vec2 TOP_TIP = vec2(0.028, -0.451);
-const vec2 SIDE_L_BASE = vec2(-0.021, 0.617);
-const vec2 SIDE_L_TIP = vec2(-0.592, 0.092);
-const vec2 SIDE_R_BASE = vec2(0.03, 0.617);
-const vec2 SIDE_R_TIP = vec2(0.6, 0.092);
-const vec2 LOW_L_BASE = vec2(-0.04, 0.886);
-const vec2 LOW_L_TIP = vec2(-0.594, 0.552);
-const vec2 LOW_R_BASE = vec2(0.041, 0.886);
-const vec2 LOW_R_TIP = vec2(0.594, 0.552);
+${GLSL_COMMON}
+${GLSL_LOGO}
 // 씨앗은 아래 언덕 호의 꼭대기에 놓인다.
 const vec2 SEED = vec2(0.0, 0.89);
-
-float hash(vec2 p) {
-  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-}
-
-float easeOut(float x) {
-  x = clamp(x, 0.0, 1.0);
-  return 1.0 - pow(1.0 - x, 3.0);
-}
-
-// 살짝 넘쳤다 돌아오는 이징. 잎이 펼쳐질 때 탄력을 준다.
-float easeOutBack(float x) {
-  x = clamp(x, 0.0, 1.0);
-  float c = 1.4;
-  return 1.0 + (c + 1.0) * pow(x - 1.0, 3.0) + c * pow(x - 1.0, 2.0);
-}
-
-vec2 rotate(vec2 v, float a) {
-  float c = cos(a), s = sin(a);
-  return vec2(c * v.x - s * v.y, s * v.x + c * v.y);
-}
-
-// 아틀라스 한 칸(panel 0: 잎 R·G·B, panel 1: 육각형 R)에서 마크 좌표 q 의 부호 거리를 읽는다.
-vec3 sdfAt(vec2 q, float panel) {
-  if (any(greaterThan(abs(q), vec2(SDF_DOMAIN * 0.995)))) return vec3(SDF_RANGE);
-  vec2 uv = q / SDF_DOMAIN * 0.5 + 0.5;
-  // 선형 보간이 옆 칸으로 번지지 않게 가로를 반 텍셀 안쪽으로 묶는다.
-  uv.x = (panel + clamp(uv.x, 0.5 / 256.0, 1.0 - 0.5 / 256.0)) * 0.5;
-  vec3 t = texture(uSdf, uv).rgb;
-  return (t * 255.0 - 128.0) / 127.0 * SDF_RANGE;
-}
-
-/**
- * 자라는 잎 하나의 거리. 화면 좌표를 거꾸로 되돌려(펼침 회전 → 크기) 로고 속 원래 자리에서 읽는다.
- * side: 같은 채널에 좌우 두 장이 들어 있어서, 원래 자리에서 반대편 잎을 읽지 않도록 막는다 (-1 왼쪽, 1 오른쪽).
- */
-float leafDist(vec2 p, vec2 base, vec2 tip, float grow, float unfurl, int channel, float side) {
-  if (grow <= 0.001) return 1e3;
-  vec2 axis = tip - base;
-  float turn = (atan(-1.0, 0.0) - atan(axis.y, axis.x)) * (1.0 - unfurl);
-  vec2 rest = base + rotate((p - base) / grow, -turn);
-  float d = sdfAt(rest, 0.0)[channel];
-  if (side != 0.0) d = max(d, -side * rest.x);
-  return d * grow;
-}
-
-float sdSegment(vec2 p, vec2 a, vec2 b) {
-  vec2 pa = p - a, ba = b - a;
-  float h = clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0);
-  return length(pa - ba * h);
-}
 
 float sdPlant(vec2 p) {
   float g = uGrow;
@@ -145,12 +65,6 @@ float sdPlant(vec2 p) {
   dLeaves = min(dLeaves, leafDist(p, LOW_R_BASE, LOW_R_TIP, gLow, uLow, 2, 1.0));
 
   return min(min(dSeed, dStem), dLeaves);
-}
-
-vec3 hexGradient(float y) {
-  return y < 0.0
-    ? mix(HEX_TOP, HEX_MID, clamp((y - HEX_Y_TOP) / -HEX_Y_TOP, 0.0, 1.0))
-    : mix(HEX_MID, HEX_BOT, clamp(y / HEX_Y_BOT, 0.0, 1.0));
 }
 
 void main() {
@@ -245,17 +159,6 @@ const UNIFORMS = [
   'uSdf',
 ] as const;
 
-function compile(gl: WebGL2RenderingContext, type: number, source: string): WebGLShader {
-  const shader = gl.createShader(type);
-  if (!shader) throw new Error('createShader failed');
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    throw new Error(gl.getShaderInfoLog(shader) ?? 'shader compile failed');
-  }
-  return shader;
-}
-
 /**
  * WebGL2 를 못 쓰거나 셰이더가 깨지면 null. 호출자는 인트로 없이 넘어간다.
  * logoSdf 는 LOGO_SDF_URL 을 디코드까지 마친 이미지다.
@@ -266,44 +169,19 @@ export function createHalftoneRenderer(canvas: HTMLCanvasElement, logoSdf: TexIm
 
   let program: WebGLProgram;
   try {
-    const created = gl.createProgram();
-    if (!created) return null;
-    program = created;
-    gl.attachShader(program, compile(gl, gl.VERTEX_SHADER, VERTEX_SOURCE));
-    gl.attachShader(program, compile(gl, gl.FRAGMENT_SHADER, FRAGMENT_SOURCE));
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) ?? '');
+    program = createProgram(gl, FRAGMENT_SOURCE);
   } catch (error) {
     console.warn('[intro] shader unavailable:', error);
     return null;
   }
 
-  const loc = Object.fromEntries(UNIFORMS.map((name) => [name, gl.getUniformLocation(program, name)])) as Record<
-    (typeof UNIFORMS)[number],
-    WebGLUniformLocation | null
-  >;
+  const loc = uniformLocations(gl, program, UNIFORMS);
   const vao = gl.createVertexArray();
-  let dpr = 1;
-
-  // 거리값이 담긴 데이터 텍스처라 색 공간 변환·알파 곱셈 없이 바이트 그대로 올린다.
-  const texture = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
-  gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, logoSdf);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-
+  const texture = uploadDataTexture(gl, logoSdf);
+  let dpr = fitCanvas(gl, canvas);
   const resize = () => {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(canvas.clientWidth * dpr);
-    canvas.height = Math.round(canvas.clientHeight * dpr);
-    gl.viewport(0, 0, canvas.width, canvas.height);
+    dpr = fitCanvas(gl, canvas);
   };
-  resize();
 
   return {
     resize,

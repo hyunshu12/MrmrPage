@@ -204,6 +204,26 @@ html[data-intro] .boot-splash > * {
   visibility: hidden;
 }
 
+/*
+ * 홈 히어로의 마크 자리 (components/hero). 하프톤 캔버스와 인트로가 둘 다 이 상자를 읽는다.
+ * 짧은 변의 21% 가 마크 단위 1 이고, 세로 화면(폰)에서는 30% 로 키운다.
+ */
+.hero-mark {
+  --u: min(min(100vw, 100svh) * 0.21, 230px);
+  position: absolute;
+  left: calc(50% - var(--u));
+  top: calc(45% - var(--u));
+  width: calc(var(--u) * 2);
+  height: calc(var(--u) * 2);
+}
+
+@media (orientation: portrait) {
+  .hero-mark {
+    --u: min(100vw * 0.3, 230px);
+    top: calc(42% - var(--u));
+  }
+}
+
 /* 첫 화면 아래 섹션은 도착했을 때 등장한다. useActiveSection 이 data-inview 를 달아 재생시킨다. */
 [data-reveal]:not([data-inview]) .reveal-up {
   animation-play-state: paused;

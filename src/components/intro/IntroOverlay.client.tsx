@@ -1,5 +1,6 @@
 'use client';
 
+import { loadImage } from '@/components/halftone/gl';
 import { useEffect, useRef, useState } from 'react';
 import { type HalftoneFrame, createHalftoneRenderer } from './halftone-renderer';
 import { LOGO_SDF_URL } from './intro-flag';
@@ -41,15 +42,13 @@ function introMark(): Mark {
 }
 
 /**
- * 홈 히어로 로고(<img>)에 마크를 겹칠 좌표. logo.png 는 가로 폭의 절반이 마크 단위 1 이고,
- * 육각형 축이 이미지 중심보다 아주 살짝(0.003) 왼쪽에 있다.
+ * 홈 히어로의 하프톤 마크 자리([data-hero-mark], components/hero). 상자 가로 폭의 절반이 마크 단위 1 이다.
+ * 히어로 캔버스가 같은 상자·같은 점 간격으로 마크를 그리므로, 인트로의 로고가 그 위에 그대로 겹친다.
  */
 function heroLogoMark(fallback: Mark): Mark {
-  const img = document.querySelector<HTMLImageElement>('main img[alt="무럭무럭 로고"]');
-  const rect = img?.getBoundingClientRect();
+  const rect = document.querySelector('[data-hero-mark]')?.getBoundingClientRect();
   if (!rect || rect.width === 0 || rect.bottom < 0 || rect.top > window.innerHeight) return fallback;
-  const unit = rect.width / 2;
-  return [rect.left + rect.width / 2 - 0.003 * unit, rect.top + rect.height / 2, unit];
+  return [rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width / 2];
 }
 
 function releasePage() {
@@ -183,11 +182,8 @@ export default function IntroOverlay({ ready, onDone }: IntroOverlayProps) {
     // 대개 캐시에서 바로 나온다. 그동안은 막(배경색)이 화면을 덮고 있다.
     let cancelled = false;
     let stop: (() => void) | undefined;
-    const logoSdf = new Image();
-    logoSdf.src = LOGO_SDF_URL;
-    logoSdf
-      .decode()
-      .then(() => {
+    loadImage(LOGO_SDF_URL)
+      .then((logoSdf) => {
         if (!cancelled) stop = play(logoSdf);
       })
       .catch(() => {
