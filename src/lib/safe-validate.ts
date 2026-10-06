@@ -7,7 +7,7 @@ export function validatePerRow<T>(items: unknown[], schema: ZodSchema<T>, label:
     if (result.success) {
       valid.push(result.data);
     } else {
-      console.error(`[notion:${label}] row ${i} dropped due to validation error:`, result.error.flatten());
+      console.error(`[data:${label}] row ${i} dropped due to validation error:`, result.error.flatten());
     }
   }
   return valid;

@@ -1,4 +1,6 @@
-const CACHE_PREFIX = 'mrmr-cache-v1';
+// v2: Notion → Sanity 이전. v1 에는 Notion S3 이미지 URL 이 들어 있는데, 그 호스트는 이제
+// next.config 의 remotePatterns 에 없어서 next/image 가 렌더 중에 던진다. 버전을 올려 버린다.
+const CACHE_PREFIX = 'mrmr-cache-v2';
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 type CacheEnvelope<T> = {

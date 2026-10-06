@@ -56,5 +56,8 @@ docs
 *.swo
 Thumbs.db
 
+# ---- Sanity Studio (sanity.studio 에 따로 배포된다) ----
+studio
+
 # ---- Stray local assets that aren't part of the app ----
 check-members.jpeg

@@ -55,10 +55,41 @@ body {
   hyphens: auto;
 }
 
-/* Long-list performance: defer off-screen layout/paint (Vercel React best practices) */
+/* Long-list performance: defer off-screen layout/paint (Vercel React best practices)
+ * `auto` 키워드: 한 번 그려진 카드는 실제 높이를 기억한다. 없으면 화면 밖으로 나갈 때마다
+ * 280px 추정치로 되돌아가 문서 높이가 출렁이고 스크롤 위치가 튄다. */
 .content-visibility-auto {
   content-visibility: auto;
-  contain-intrinsic-size: 0 280px;
+  contain-intrinsic-size: auto 280px;
+}
+
+/*
+ * 섹션 스냅 — 데스크톱 + 정밀 포인터(마우스·트랙패드) 전용.
+ *
+ * 예전엔 wheel 이벤트를 가로채 JS 로 섹션을 넘겼는데 트랙패드에서 어색했다.
+ * 살짝 밀면 반쯤 걸친 채 멈추고, 관성 꼬리가 잠금이 풀린 뒤 한 섹션을 더 넘겼다.
+ * 네이티브 스냅은 드래그하는 동안 손가락을 그대로 따라가고, 놓으면 가까운 섹션으로 감긴다.
+ *
+ * snap-stop: always — 세게 튕겨도 한 번에 한 섹션씩만 넘어간다.
+ * 뷰포트보다 긴 섹션(목록 등)은 브라우저가 그 안을 자유 스크롤로 둔다.
+ */
+@media (pointer: fine) and (min-width: 1024px) {
+  html:has(.snap-section) {
+    scroll-snap-type: y mandatory;
+  }
+
+  /* 섹션 하나가 최소 한 화면을 채운다. 내용이 짧아도 섹션 시작에 정확히 멈출 수 있고,
+   * 바로 위 섹션의 끝자락이 화면 위쪽에 걸쳐 보이지 않는다. */
+  .snap-section {
+    min-height: 100svh;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  /* 마지막 섹션 아래의 푸터까지 내려갈 수 있도록 문서 끝도 스냅 지점으로 둔다. */
+  html:has(.snap-section) footer {
+    scroll-snap-align: end;
+  }
 }
 
 /* Page gradient backgrounds */
@@ -150,6 +181,34 @@ body {
   animation-delay: 360ms;
 }
 
+/*
+ * 홈 첫 진입 인트로 (components/intro). layout 의 인라인 스크립트가 data-intro 를 달고,
+ * 인트로가 화면을 여는 순간 떼어낸다. 그동안 스크롤을 막고 히어로 애니메이션을 0 프레임에 붙잡아 둔다
+ * — 로고가 인트로에서 내려앉을 자리가 흔들리지 않고, 텍스트는 화면이 열릴 때 등장한다.
+ */
+html[data-intro] {
+  overflow: hidden;
+}
+
+html[data-intro] .reveal-up,
+html[data-intro] .float-slow {
+  animation-play-state: paused;
+}
+
+/* 하이드레이션 전 기본 스플래시가 크림색으로 번쩍이지 않게 인트로 배경색으로 칠한다. */
+html[data-intro] .boot-splash {
+  background: #1c2a17;
+}
+
+html[data-intro] .boot-splash > * {
+  visibility: hidden;
+}
+
+/* 첫 화면 아래 섹션은 도착했을 때 등장한다. useActiveSection 이 data-inview 를 달아 재생시킨다. */
+[data-reveal]:not([data-inview]) .reveal-up {
+  animation-play-state: paused;
+}
+
 .divider-shine {
   position: relative;
   overflow: hidden;
@@ -235,4 +294,24 @@ body {
 .kakao-shortcut:hover .kakao-shortcut-arrow {
   transform: translateX(2px);
   background: rgba(81, 102, 47, 0.18);
+}
+
+/* 움직임 줄이기 설정을 존중한다. 등장 애니메이션은 건너뛰고 바로 보여준다. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal-up {
+    opacity: 1;
+    animation: none;
+  }
+
+  .float-slow,
+  .float-slower,
+  .drift-slow,
+  .cta-float,
+  .divider-shine::after {
+    animation: none;
+  }
 }

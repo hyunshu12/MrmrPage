@@ -1,6 +1,6 @@
 'use client';
 
-import NotionImage from '@/components/NotionImage';
+import CmsImage from '@/components/CmsImage';
 import { membersQueryKey } from '@/hooks/useApi';
 import { getRoleColor } from '@/lib/getRoleColor';
 import type { Member } from '@/types';
@@ -99,7 +99,7 @@ export default function MembersTabs({ members }: { members: Member[] }) {
               {/* 프로필 이미지 영역 */}
               <div className="aspect-[312/275] w-full overflow-hidden bg-gray-200">
                 {member.avatarUrl ? (
-                  <NotionImage
+                  <CmsImage
                     src={member.avatarUrl}
                     alt={member.name}
                     width={624}

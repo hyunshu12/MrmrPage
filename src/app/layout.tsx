@@ -3,6 +3,8 @@ import Script from 'next/script';
 import type { ReactNode } from 'react';
 import './globals.css';
 import AppBootGate from '@/components/AppBootGate.client';
+import BoothFonts from '@/components/BoothFonts.client';
+import { INTRO_FLAG_SCRIPT } from '@/components/intro/intro-flag';
 import Footer from '@/components/layout/Footer';
 import Header from '@/components/layout/Header';
 import QueryClientProvider from '@/providers/QueryClientProvider';
@@ -122,8 +124,11 @@ export default function RootLayout({ children }: RootLayoutProps) {
   };
 
   return (
-    <html lang="ko">
+    // suppressHydrationWarning: 아래 인라인 스크립트가 하이드레이션 전에 data-intro 를 단다.
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: 코드에 고정된 상수 문자열이다 */}
+        <script dangerouslySetInnerHTML={{ __html: INTRO_FLAG_SCRIPT }} />
         <Script id="ld-website" type="application/ld+json" strategy="beforeInteractive">
           {JSON.stringify(websiteJsonLd)}
         </Script>
@@ -132,6 +137,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
         </Script>
       </head>
       <body className="flex min-h-screen flex-col font-crimson">
+        {/* 부스 모드에서만 로컬 웹폰트를 얹는다. 스플래시보다 먼저 마운트되도록 게이트 바깥에 둔다. */}
+        <BoothFonts />
         <QueryClientProvider>
           <AppBootGate>
             <Header />

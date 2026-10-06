@@ -51,3 +51,6 @@ docs/private/**/*.md
 /.playwright-mcp/
 # local Claude Code config & worktree metadata (keep settings.json shareable via negation if desired)
 .claude/worktrees/
+
+# 부스 오프라인 스냅샷 (bun run booth:snapshot 으로 생성)
+/public/booth/

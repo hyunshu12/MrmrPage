@@ -1,0 +1,24 @@
+{
+  "name": "mrmr-studio",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "sanity dev",
+    "build": "sanity build",
+    "deploy": "sanity deploy"
+  },
+  "dependencies": {
+    "@sanity/icons": "^5.2.3",
+    "@sanity/locale-ko-kr": "^1.1.40",
+    "@sanity/orderable-document-list": "^2.0.25",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "sanity": "^6.17.0",
+    "styled-components": "^6.1.15"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
+  }
+}

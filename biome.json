@@ -6,7 +6,8 @@
     "useIgnoreFile": true
   },
   "files": {
-    "maxSize": 3145728
+    "maxSize": 3145728,
+    "ignore": ["./studio/node_modules", "./studio/dist", "./studio/.sanity"]
   },
   "linter": {
     "enabled": true,

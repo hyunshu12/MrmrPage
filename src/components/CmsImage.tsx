@@ -4,9 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import Image, { type ImageProps } from 'next/image';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
-type NotionImageProps = Omit<ImageProps, 'src'> & {
+type CmsImageProps = Omit<ImageProps, 'src'> & {
   src: string | null | undefined;
   fallback?: ReactNode;
+  /** 로드 실패 시 이 쿼리를 한 번 다시 받아온다. 편집자가 사진을 바꿔 URL 이 달라진 경우를 복구한다. */
   invalidateQueryKey?: readonly unknown[];
 };
 
@@ -22,14 +23,14 @@ type NotionImageProps = Omit<ImageProps, 'src'> & {
  * placeholder='blur'는 이 모든 경우에 bg-gray-200 대신 브랜드 blur를 즉시 그려
  * 회색 플래시를 구조적으로 불가능하게 만든다(예측 정확도와 무관한 직교 보장).
  *
- * 원본이 원격(S3 presigned) 동적 URL이라 Next가 blur를 자동 생성할 수 없으므로
+ * 원본이 원격(Sanity CDN) URL이라 Next가 blur를 자동 생성할 수 없으므로
  * 정적 blurDataURL을 직접 제공한다. svg가 아닌 raster(PNG) data URL이라
  * dangerouslyAllowSVG 없이도 안전하게 렌더된다. img-src에 data: 가 이미 허용돼 있다.
  */
 const FALLBACK_BLUR_DATA_URL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGN49u4pVsQwtCQAFgSuQV1cocQAAAAASUVORK5CYII=';
 
-export default function NotionImage({
+export default function CmsImage({
   src,
   fallback = null,
   invalidateQueryKey,
@@ -39,7 +40,7 @@ export default function NotionImage({
   placeholder,
   blurDataURL,
   ...rest
-}: NotionImageProps) {
+}: CmsImageProps) {
   const queryClient = useQueryClient();
   const [errored, setErrored] = useState(false);
   const recoveryAttemptedRef = useRef(false);

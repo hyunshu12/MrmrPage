@@ -25,6 +25,8 @@ const config: Config = {
           'green-dark': '#62783e',
           'green-darker': '#51662f',
           'green-deepest': '#394e25',
+          // 인트로 배경. 하프톤 셰이더(intro/halftone-renderer.ts)의 BG 와 같은 값이다.
+          'green-night': '#1c2a17',
           'green-text': '#4a5a35',
           'green-muted': '#7a9a70',
           'green-award': '#4d6f2c',

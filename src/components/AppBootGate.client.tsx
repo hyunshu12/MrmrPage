@@ -1,12 +1,14 @@
 'use client';
 
+import IntroOverlay from '@/components/intro/IntroOverlay.client';
+import { markIntroSeen, shouldPlayIntro } from '@/components/intro/intro-flag';
 import { achievementsQueryKey, membersQueryKey, projectsQueryKey } from '@/hooks/useApi';
 import { fetchAchievements, fetchMembers, fetchProjects } from '@/lib/api-client';
 import { hasCache } from '@/lib/local-cache';
 import type { Achievement, Member, Project } from '@/types';
 import { useQueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 const HERO_IMAGE_URLS = ['/memberImage.png', '/projectImage.png', '/archiveImage.png'] as const;
 const MAX_CONTENT_IMAGE_PRELOAD = 20;
@@ -180,7 +182,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T | null> {
 
 function Splash() {
   return (
-    <div aria-hidden="true" className="fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-home">
+    // boot-splash: 인트로가 재생될 페이지에서는 CSS 가 이 막을 인트로 배경색으로 바꿔 깜빡임을 없앤다.
+    <div
+      aria-hidden="true"
+      className="boot-splash fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-home">
       <div className="flex flex-col items-center gap-6">
         <img
           src="/logo.png"
@@ -200,6 +205,16 @@ function Splash() {
 export default function AppBootGate({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [ready, setReady] = useState(false);
+  const [intro, setIntro] = useState(false);
+
+  useEffect(() => {
+    setIntro(shouldPlayIntro());
+  }, []);
+
+  const finishIntro = useCallback(() => {
+    markIntroSeen();
+    setIntro(false);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -302,6 +317,11 @@ export default function AppBootGate({ children }: { children: ReactNode }) {
     };
   }, [queryClient]);
 
-  if (!ready) return <Splash />;
-  return <>{children}</>;
+  // 인트로는 페이지 위에 덮여 있다가 데이터가 준비되면 열리며 페이지를 드러낸다.
+  return (
+    <>
+      {ready && children}
+      {intro ? <IntroOverlay ready={ready} onDone={finishIntro} /> : !ready && <Splash />}
+    </>
+  );
 }

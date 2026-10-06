@@ -1,4 +1,4 @@
-import { getPublishedMembers } from '@/lib/notion';
+import { getPublishedMembers } from '@/lib/sanity';
 import { NextResponse } from 'next/server';
 
 // CDN/edge caching for this public GET route.
@@ -9,11 +9,11 @@ import { NextResponse } from 'next/server';
 // and Vercel's CDN honors its s-maxage / stale-while-revalidate directives.
 // We drop the previous 'force-dynamic' (set the explicit framework default
 // 'auto') so there is no ambiguity about the route opting out of caching; the
-// handler still runs per request (no build-time Notion query).
+// handler still runs per request (no build-time CMS query).
 export const dynamic = 'auto';
 
 // Edge cache for 10 min (matches the client React Query stale time); serve
-// stale up to 1 day while revalidating in the background so a Notion outage
+// stale up to 1 day while revalidating in the background so a CMS outage
 // or rate-limit never blocks visitors.
 const CACHE_CONTROL = 'public, s-maxage=600, stale-while-revalidate=86400';
 
@@ -25,7 +25,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error fetching members:', error);
-    // Do not cache errors: a transient Notion failure must not be pinned at
+    // Do not cache errors: a transient CMS failure must not be pinned at
     // the edge for the full TTL.
     return NextResponse.json(
       { error: 'Failed to fetch members data' },

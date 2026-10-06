@@ -2,25 +2,18 @@
 
 import MembersTabs from '@/components/members/MembersTabs.client';
 import { useMembers } from '@/hooks/useApi';
-import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { MEMBER_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useRef } from 'react';
 
 export default function MembersPage() {
   const membersQuery = useMembers();
   const members = membersQuery.data ?? [];
   const error = membersQuery.isError;
-  const sectionRefs = useRef<Array<HTMLElement | null>>([]);
-  useSnapScroll(sectionRefs, true);
 
   return (
     <div className="min-h-screen bg-gradient-members">
       <section
-        ref={(el) => {
-          sectionRefs.current[0] = el;
-        }}
-        className="relative min-h-[100svh] overflow-hidden"
+        className="snap-section relative min-h-[100svh] overflow-hidden"
         style={{
           backgroundColor: MEMBER_HERO_PLACEHOLDER.dominantColor,
           backgroundImage: `url(${MEMBER_HERO_PLACEHOLDER.blurDataUrl})`,
@@ -65,12 +58,7 @@ export default function MembersPage() {
         </a>
       </section>
 
-      <div
-        id="members-content"
-        ref={(el) => {
-          sectionRefs.current[1] = el;
-        }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
+      <div id="members-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
         {/* 에러 */}
         {error && (
           <div className="mb-6 rounded-card bg-red-50/80 border border-red-200 p-4 text-red-700">

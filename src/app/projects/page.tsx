@@ -1,11 +1,10 @@
 'use client';
 
-import NotionImage from '@/components/NotionImage';
+import CmsImage from '@/components/CmsImage';
 import { projectsQueryKey, useProjects } from '@/hooks/useApi';
-import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { PROJECT_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -18,8 +17,6 @@ export default function ProjectsPage() {
   const projectsQuery = useProjects();
   const projects = projectsQuery.data ?? [];
   const error = projectsQuery.isError;
-  const sectionRefs = useRef<Array<HTMLElement | null>>([]);
-  useSnapScroll(sectionRefs, true);
 
   // 연도별 그룹핑
   const { yearKeys, projectsByYear } = useMemo(() => {
@@ -49,10 +46,7 @@ export default function ProjectsPage() {
   return (
     <div className="min-h-screen bg-gradient-projects">
       <section
-        ref={(el) => {
-          sectionRefs.current[0] = el;
-        }}
-        className="relative min-h-[100svh] overflow-hidden"
+        className="snap-section relative min-h-[100svh] overflow-hidden"
         style={{
           backgroundColor: PROJECT_HERO_PLACEHOLDER.dominantColor,
           backgroundImage: `url(${PROJECT_HERO_PLACEHOLDER.blurDataUrl})`,
@@ -98,12 +92,7 @@ export default function ProjectsPage() {
         </a>
       </section>
 
-      <div
-        id="projects-content"
-        ref={(el) => {
-          sectionRefs.current[1] = el;
-        }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
+      <div id="projects-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
         {/* 연도 탭 */}
         {yearKeys.length > 0 && (
           <div className="mb-12 flex justify-start">
@@ -151,7 +140,7 @@ export default function ProjectsPage() {
                 className="content-visibility-auto group flex flex-col overflow-hidden rounded-card bg-muruk-card-bg shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row">
                 <div className="w-full shrink-0 overflow-hidden bg-muruk-green-lightest/30 sm:w-2/5">
                   {project.logoUrl ? (
-                    <NotionImage
+                    <CmsImage
                       src={project.logoUrl}
                       alt={project.name}
                       width={600}

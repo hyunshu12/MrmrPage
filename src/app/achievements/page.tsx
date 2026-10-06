@@ -1,11 +1,10 @@
 'use client';
 
-import NotionImage from '@/components/NotionImage';
+import CmsImage from '@/components/CmsImage';
 import { achievementsQueryKey, useAchievements } from '@/hooks/useApi';
-import { useSnapScroll } from '@/hooks/useSnapScroll';
 import { ARCHIVE_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
 import Image from 'next/image';
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 function parseYear(value: string): number | null {
   const match = value.match(/(\d{4})/);
@@ -18,8 +17,6 @@ export default function AchievementsPage() {
   const achievementsQuery = useAchievements();
   const achievements = achievementsQuery.data ?? [];
   const error = achievementsQuery.isError;
-  const sectionRefs = useRef<Array<HTMLElement | null>>([]);
-  useSnapScroll(sectionRefs, true);
 
   // 연도별 그룹핑
   const { yearKeys, achievementsByYear } = useMemo(() => {
@@ -49,10 +46,7 @@ export default function AchievementsPage() {
   return (
     <div className="min-h-screen bg-gradient-achievements">
       <section
-        ref={(el) => {
-          sectionRefs.current[0] = el;
-        }}
-        className="relative min-h-[100svh] overflow-hidden"
+        className="snap-section relative min-h-[100svh] overflow-hidden"
         style={{
           backgroundColor: ARCHIVE_HERO_PLACEHOLDER.dominantColor,
           backgroundImage: `url(${ARCHIVE_HERO_PLACEHOLDER.blurDataUrl})`,
@@ -97,12 +91,7 @@ export default function AchievementsPage() {
         </a>
       </section>
 
-      <div
-        id="achievements-content"
-        ref={(el) => {
-          sectionRefs.current[1] = el;
-        }}
-        className="mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-20">
+      <div id="achievements-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
         {/* 연도 탭 */}
         {yearKeys.length > 0 && (
           <div className="mb-12 flex flex-wrap gap-2.5 pb-2 sm:gap-3">
@@ -151,7 +140,7 @@ export default function AchievementsPage() {
                 {/* 썸네일 이미지 */}
                 <div className="aspect-[2/1] w-full shrink-0 overflow-hidden bg-gray-200">
                   {achievement.thumbnailUrl ? (
-                    <NotionImage
+                    <CmsImage
                       src={achievement.thumbnailUrl}
                       alt={achievement.name}
                       width={800}

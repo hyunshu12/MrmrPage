@@ -18,9 +18,9 @@ const isProd = process.env.NODE_ENV === 'production';
  * - font-src: 폰트 파일은 fonts.gstatic.com(Crimson Text)과 cdn.jsdelivr.net(Pretendard).
  *   data: 는 인라인/base64 폰트 fallback 대비.
  * - img-src: next/image 최적화 경로는 동일 출처('self')지만, 원본/비최적화 fallback과
- *   blur placeholder(data:), blob: 을 대비해 S3 두 호스트를 명시.
+ *   blur placeholder(data:), blob: 을 대비해 Sanity 이미지 CDN을 명시.
  * - connect-src 'self': 브라우저 측 fetch는 React Query가 동일 출처 /api만 호출(api-client.ts).
- *   S3 다운로드(image-store.ts)는 서버(Node) 측이라 CSP 미적용.
+ *   Sanity 조회(src/lib/sanity)는 서버(Node) 측이라 CSP 미적용.
  * - frame-ancestors 'none': 클릭재킹 방지(앱에 iframe 임베드 요구 없음).
  * - base-uri 'self' / form-action 'self' / object-src 'none': 베이스 URL 변조, 폼 탈취, 플러그인 차단.
  * - upgrade-insecure-requests: 혼합 콘텐츠를 https로 자동 승격.
@@ -30,7 +30,7 @@ const cspDirectives = [
   isProd ? "script-src 'self' 'unsafe-inline'" : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
   "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:",
-  "img-src 'self' data: blob: https://prod-files-secure.s3.us-west-2.amazonaws.com https://s3.us-west-2.amazonaws.com",
+  "img-src 'self' data: blob: https://cdn.sanity.io",
   "connect-src 'self'",
   "media-src 'self'",
   "worker-src 'self' blob:",
@@ -70,21 +70,25 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // vgpu(WebGPU) 셰이더 로더.
+  // .wgsl 파일을 빌드 타임에 JS 문자열 모듈로 변환한다. 런타임 eval이 없으므로
+  // prod CSP(script-src에 'unsafe-eval' 없음)와 충돌하지 않는다.
+  turbopack: {
+    rules: {
+      '*.wgsl': {
+        loaders: ['@vgpu/wgsl/loader-webpack'],
+        as: '*.js',
+      },
+    },
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      // Sanity 이미지 CDN. 이 프로젝트·데이터셋의 이미지만 허용한다.
       {
         protocol: 'https',
-        hostname: 'prod-files-secure.s3.us-west-2.amazonaws.com',
-        pathname: '/**',
-      },
-      // 레거시 호스트. image-store.ts의 ALLOWED_HOSTNAMES에 여전히 포함되어 있어
-      // 일부 Notion 'file' URL이 이 호스트를 쓸 수 있으므로 제거하지 않는다.
-      // pathname 제약으로 범위만 좁힌다.
-      {
-        protocol: 'https',
-        hostname: 's3.us-west-2.amazonaws.com',
-        pathname: '/**',
+        hostname: 'cdn.sanity.io',
+        pathname: '/images/dldhzjbv/production/**',
       },
     ],
   },

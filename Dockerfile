@@ -26,8 +26,8 @@ RUN bun install --frozen-lockfile
 # Stage 2 — build: compile the Next.js app.
 # Reuses the installed node_modules from the deps stage, then
 # copies the source and produces the .next build output.
-# No NOTION_* / NEXT_PUBLIC_* secrets are required at build time:
-# all /api routes are force-dynamic and every Notion-consuming
+# No secrets are required at build time (Sanity is read without a token):
+# all /api routes are force-dynamic and every CMS-consuming
 # page is a client component fetching via React Query at runtime.
 # -------------------------------------------------------------
 FROM ${BUN_IMAGE} AS build
