@@ -2,7 +2,6 @@
 
 import CmsImage from '@/components/CmsImage';
 import HalftoneHero from '@/components/hero/HalftoneHero.client';
-import HeroDock from '@/components/hero/HeroDock.client';
 import SectionDots from '@/components/home/SectionDots';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { achievementsQueryKey, projectsQueryKey, useAchievements, useProjects } from '@/hooks/useApi';
@@ -42,7 +41,7 @@ export default function HomePage() {
       <SectionDots labels={SECTION_LABELS} active={activeSection} onSelect={scrollToSection} />
 
       <div className="relative z-10">
-        {/* 첫 화면: 하프톤 로고와 스마트팜 픽토그램, 아래쪽 바로가기 (components/hero) */}
+        {/* 첫 화면: 하프톤 로고와 스마트팜 픽토그램 (components/hero) */}
         <section
           ref={(el) => {
             sectionRefs.current[0] = el;
@@ -50,7 +49,22 @@ export default function HomePage() {
           className="snap-section relative min-h-[100svh] overflow-hidden">
           <HalftoneHero />
           <h1 className="sr-only">무럭무럭 — 한국디지털미디어고등학교 스마트팜 동아리 (PLANT US, RAISE EARTH)</h1>
-          <HeroDock />
+          {/* 스크롤 안내 화살표 */}
+          <a
+            href="#home-intro"
+            aria-label="홈 소개 내용으로 이동"
+            className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80">
+            <span className="sr-only">홈 소개 내용으로 이동</span>
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              className="mx-auto h-7 w-7"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
         </section>
 
         {/* 스크롤 후 보이는 영역: 소개 + 요약 */}

@@ -26,6 +26,8 @@ uniform vec3 uMark;     // 마크 중심 x, y (CSS px, y 아래로) · 마크 �
 uniform vec3 uMorph;    // 이전 그림 · 다음 그림 · 진행 0..1
 uniform vec2 uPointer;  // 커서 위치 -1..1. 픽토그램 시차에 쓴다
 uniform float uEnter;   // 픽토그램 등장 0..1
+uniform float uPulse;   // 성장 파동 경과 시간(초), 음수면 없음
+uniform vec3 uCursor;   // 커서 x, y (CSS px) · 세기 0..1
 
 out vec4 outColor;
 
@@ -241,23 +243,32 @@ void main() {
     // 경계를 막 넘은 셀은 잠깐 작게 찍혀 반짝인다.
     float flip = 1.0 - 0.6 * exp(-pow((uMorph.z - threshold) * 14.0, 2.0)) * step(0.001, uMorph.z) * step(uMorph.z, 0.999);
     float breathe = 0.92 + 0.08 * sin(uTime * 1.6 - length(q) * 5.0);
-    v = hexCov * (1.0 - innerCov) * flip * breathe;
-    ink = hexGradient(q.y);
+    // 빛 결: 몇 초마다 대각선 띠가 육각형을 스치며 점을 살짝 부풀리고 밝힌다.
+    float diag = (q.x + q.y) * 0.7071;
+    float sheen = exp(-pow((diag - (fract(uTime / 6.0) * 3.6 - 1.8)) / 0.22, 2.0));
+    // 커서 둘레의 점이 부푼다. 최대 크기를 넘으면 이웃 점과 맞닿아 뭉친다.
+    vec2 toCursor = (cc - uCursor.xy) / (uMark.z * 0.42);
+    float hover = uCursor.z * exp(-dot(toCursor, toCursor));
+    v = hexCov * (1.0 - innerCov) * flip * breathe * (1.0 + 0.3 * sheen + 0.5 * hover);
+    ink = mix(hexGradient(q.y), vec3(1.0, 0.98, 0.86), 0.22 * sheen);
   } else {
     // ── 둘레 픽토그램 ──────────────────────────────────────
     float shortSide = min(vp.x, vp.y);
     for (int i = 0; i < ICON_COUNT; i++) {
       vec4 icon = ICONS[i];
       float fi = float(i);
-      float enter = easeOutBack(uEnter * 1.8 - fi * 0.1);
+      // 제자리에서 점이 차오르며 맺힌다. 아이콘마다 조금씩 늦게.
+      float enter = easeOut(uEnter * 1.6 - fi * 0.08);
       if (enter <= 0.001) continue;
-      float size = icon.z * shortSide * enter;
-      vec2 center = icon.xy * vp
-        + vec2(0.0, sin(uTime * 0.7 + fi * 1.7) * 0.012 * shortSide)
-        + uPointer * icon.w * 16.0;
+      float size = icon.z * shortSide * mix(0.88, 1.0, enter);
+      // 제각각 다른 속도로 천천히 궤도를 그리며 떠다닌다. 가까운 것(w 큼)일수록 커서를 더 따라간다.
+      vec2 drift = vec2(sin(uTime * 0.31 + fi * 2.1), cos(uTime * 0.27 + fi * 1.3)) * 0.018 * shortSide;
+      vec2 center = icon.xy * vp + drift
+        + vec2(0.0, sin(uTime * 0.7 + fi * 1.7) * 0.01 * shortSide)
+        + uPointer * icon.w * 26.0;
       vec2 local = (cc - center) / size;
       if (dot(local, local) > 2.6) continue;
-      local = rotate(local, sin(uTime * 0.45 + fi) * 0.06);
+      local = rotate(local, sin(uTime * 0.4 + fi) * 0.12);
       float hl = 0.6 * uCell / size;
       float d = iconShape(i, local);
       float cov = smoothstep(hl, -hl, d);
@@ -265,11 +276,21 @@ void main() {
       float light = clamp(0.55 - dot(local, vec2(0.45, 0.55)) * 0.45, 0.0, 1.0);
       float rim = smoothstep(0.0, 0.18, -d);
       float shade = mix(1.0, 0.38, light * rim);
-      float iv = cov * shade;
+      float iv = cov * shade * enter;
       if (iv > v) {
         v = iv;
         ink = mix(INK_SOFT, INK, icon.w);
         alpha = 0.55 + 0.4 * icon.w;
+      }
+    }
+    // 성장 파동: 그림이 바뀔 때마다 로고에서 은은한 점 고리가 퍼진다 (인트로의 씨앗 파동을 잇는다).
+    if (uPulse >= 0.0) {
+      float ringR = uMark.z * (1.05 + uPulse * 2.6);
+      float ring = exp(-pow((length(cc - uMark.xy) - ringR) / (uMark.z * 0.15), 2.0)) * exp(-uPulse * 1.1);
+      if (ring * 0.28 > v) {
+        v = ring * 0.28;
+        ink = INK_SOFT;
+        alpha = 0.35;
       }
     }
     // 드문드문 떠 있는 먼지 점.
@@ -280,7 +301,7 @@ void main() {
     }
   }
 
-  float r = sqrt(clamp(v, 0.0, 1.0)) * 0.47 * uCell;
+  float r = sqrt(clamp(v, 0.0, 1.6)) * 0.47 * uCell;
   float a = smoothstep(r + aa, r - aa, length(lp)) * alpha * step(0.001, v);
   outColor = vec4(ink * a, a);
 }`;
@@ -293,6 +314,10 @@ export interface HeroFrame {
   morph: readonly [from: number, to: number, progress: number];
   pointer: readonly [x: number, y: number];
   enter: number;
+  /** 마지막 성장 파동 이후 초. 음수면 없음 */
+  pulse: number;
+  /** 커서 x, y (캔버스 CSS px) · 세기 0..1 */
+  cursor: readonly [x: number, y: number, strength: number];
 }
 
 export interface HeroRenderer {
@@ -301,7 +326,19 @@ export interface HeroRenderer {
   dispose(): void;
 }
 
-const UNIFORMS = ['uRes', 'uDpr', 'uTime', 'uCell', 'uMark', 'uMorph', 'uPointer', 'uEnter', 'uSdf'] as const;
+const UNIFORMS = [
+  'uRes',
+  'uDpr',
+  'uTime',
+  'uCell',
+  'uMark',
+  'uMorph',
+  'uPointer',
+  'uEnter',
+  'uPulse',
+  'uCursor',
+  'uSdf',
+] as const;
 
 /** WebGL2 를 못 쓰거나 셰이더가 깨지면 null. 호출자는 정적 로고 이미지로 대신한다. */
 export function createHeroRenderer(canvas: HTMLCanvasElement, logoSdf: TexImageSource): HeroRenderer | null {
@@ -338,6 +375,8 @@ export function createHeroRenderer(canvas: HTMLCanvasElement, logoSdf: TexImageS
       gl.uniform3f(loc.uMorph, frame.morph[0], frame.morph[1], frame.morph[2]);
       gl.uniform2f(loc.uPointer, frame.pointer[0], frame.pointer[1]);
       gl.uniform1f(loc.uEnter, frame.enter);
+      gl.uniform1f(loc.uPulse, frame.pulse);
+      gl.uniform3f(loc.uCursor, frame.cursor[0], frame.cursor[1], frame.cursor[2]);
       gl.uniform1i(loc.uSdf, 0);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
     },

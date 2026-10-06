@@ -12,7 +12,9 @@ interface SectionDotsProps {
  */
 export default function SectionDots({ labels, active, onSelect }: SectionDotsProps) {
   return (
-    <nav aria-label="섹션 이동" className="fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 min-[1360px]:block">
+    <nav
+      aria-label="섹션 이동"
+      className="intro-chrome-fade fixed right-6 top-1/2 z-40 hidden -translate-y-1/2 min-[1360px]:block">
       <ul className="flex flex-col items-end gap-1">
         {labels.map((label, index) => {
           const isActive = index === active;

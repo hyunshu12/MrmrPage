@@ -19,9 +19,13 @@ export default function Header() {
   const [hasPassedHero, setHasPassedHero] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const isHeroZone = isHeroOverlayPage && !hasPassedHero;
+  // 홈 첫 화면은 하프톤 그래픽이 차지한다. 바(배경·그림자) 없이 글자만 띄워 두고, 지나면 바가 생긴다.
+  const isHome = pathname === '/';
+  const isHomeHero = isHome && !hasPassedHero;
+  const tracksHero = isHeroOverlayPage || isHome;
 
   useEffect(() => {
-    if (!isHeroOverlayPage) {
+    if (!tracksHero) {
       setHasPassedHero(false);
       return;
     }
@@ -38,7 +42,7 @@ export default function Header() {
       window.removeEventListener('scroll', updateState);
       window.removeEventListener('resize', updateState);
     };
-  }, [isHeroOverlayPage]);
+  }, [tracksHero]);
 
   useEffect(() => {
     if (!isMobileMenuOpen) return undefined;
@@ -57,11 +61,14 @@ export default function Header() {
     : 'text-muruk-green-text/70 hover:text-muruk-green-darker';
 
   return (
+    // intro-chrome: 홈 인트로가 끝난 뒤 내려앉듯 나타난다 (globals.css).
     <header
-      className={`fixed left-0 right-0 top-0 z-50 border-b backdrop-blur-md transition-all ${
+      className={`intro-chrome fixed left-0 right-0 top-0 z-50 border-b transition-all duration-500 ${
         isHeroZone
-          ? 'border-white/1 bg-white/1 shadow-[0_8px_22px_rgba(0,0,0,0.14)]'
-          : 'border-white/45 bg-white/32 shadow-[0_10px_24px_rgba(0,0,0,0.08)]'
+          ? 'border-white/1 bg-white/1 shadow-[0_8px_22px_rgba(0,0,0,0.14)] backdrop-blur-md'
+          : isHomeHero
+            ? 'border-transparent bg-transparent shadow-none'
+            : 'border-white/45 bg-white/32 shadow-[0_10px_24px_rgba(0,0,0,0.08)] backdrop-blur-md'
       }`}>
       <nav className="mx-auto flex max-w-[1920px] items-center justify-between px-4 py-3 sm:px-6 md:px-10 md:py-4 lg:px-16">
         {/* 무럭무럭 로고 */}

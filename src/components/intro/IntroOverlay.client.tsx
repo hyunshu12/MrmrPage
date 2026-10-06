@@ -18,10 +18,11 @@ import { LOGO_SDF_URL } from './intro-flag';
 const HOLD_AT = 2.9;
 /** 클릭·키·휠로 건너뛰면 남은 성장을 이 배속으로 감는다. */
 const SKIP_SPEED = 5;
-const MOVE_SECONDS = 0.55;
-const WIPE_START = 0.35;
-const WIPE_SECONDS = 0.75;
-const OUTRO_SECONDS = 1.15;
+// 퇴장: 로고가 히어로 자리로 옮겨 앉고(MOVE), 그 아래에서 화면이 점으로 번지며 열린다(WIPE).
+const MOVE_SECONDS = 0.75;
+const WIPE_START = 0.5;
+const WIPE_SECONDS = 1.15;
+const OUTRO_SECONDS = 1.75;
 const TAGLINE = 'PLANT US · RAISE EARTH';
 
 type Mark = readonly [x: number, y: number, unit: number];
@@ -51,8 +52,12 @@ function heroLogoMark(fallback: Mark): Mark {
   return [rect.left + rect.width / 2, rect.top + rect.height / 2, rect.width / 2];
 }
 
+/** 페이지를 풀어 준다. data-intro-done 이 붙으면 상단 바와 섹션 점이 뒤늦게 내려앉는다 (globals.css). */
 function releasePage() {
-  document.documentElement.removeAttribute('data-intro');
+  const root = document.documentElement;
+  if (!root.hasAttribute('data-intro')) return;
+  root.removeAttribute('data-intro');
+  root.setAttribute('data-intro-done', '');
 }
 
 interface IntroOverlayProps {
@@ -139,7 +144,7 @@ export default function IntroOverlay({ ready, onDone }: IntroOverlayProps) {
           idle: easeOut(t / 0.5),
           ripple: t > 0.35 ? t - 0.35 : -1,
           wipe,
-          markAlpha: 1 - easeOut((o - 0.55) / 0.45),
+          markAlpha: 1 - easeOut((o - 0.8) / 0.6),
         };
         renderer.draw(state);
         // 첫 프레임이 그려질 때까지는 막이 배경을 대신 칠한다. 이후 구멍은 캔버스가 연다.
@@ -147,7 +152,7 @@ export default function IntroOverlay({ ready, onDone }: IntroOverlayProps) {
 
         const tagline = taglineRef.current;
         if (tagline) {
-          const shown = easeOut((t - 2.3) / 0.5) * (1 - easeOut(o / 0.25));
+          const shown = easeOut((t - 2.3) / 0.5) * (1 - easeOut(o / 0.35));
           tagline.style.opacity = String(shown);
           tagline.style.top = `${mark[1] + mark[2] * 1.15}px`;
         }

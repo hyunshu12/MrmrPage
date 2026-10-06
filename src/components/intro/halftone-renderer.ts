@@ -105,7 +105,8 @@ void main() {
   float idleAlpha = uIdle * 0.22 + rip * 0.4;
 
   // ── 퇴장 구멍: 가장자리 셀은 점이 줄어들며 사라진다 ─────────
-  float band = 2.5 * uCell;
+  // 넓은 띠에서 점이 서서히 작아져, 어두운 화면이 밝은 화면으로 번지듯 열린다.
+  float band = 6.0 * uCell;
   float keep = uWipe <= 0.0 ? 1.0 : smoothstep(uWipe - band, uWipe + band, length(cc - uMark.xy));
 
   vec3 bg = mix(BG_GLOW, BG, smoothstep(0.0, 0.7, length((px - uMark.xy) / max(vp.x, vp.y))));

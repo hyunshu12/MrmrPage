@@ -7,10 +7,15 @@ import { useEffect, useRef, useState } from 'react';
 import { type HeroFrame, INNER_SHAPES, createHeroRenderer } from './hero-renderer';
 
 /** 인트로가 내려앉은 뒤 잎 그림을 보여주는 시간. 이후 그림이 바뀌기 시작한다. */
-const FIRST_HOLD_SECONDS = 4.2;
-const HOLD_SECONDS = 3.4;
-const MORPH_SECONDS = 1.2;
-const ENTER_SECONDS = 1.4;
+const FIRST_HOLD_SECONDS = 2.2;
+const HOLD_SECONDS = 2.8;
+const MORPH_SECONDS = 1.0;
+const ENTER_SECONDS = 2.2;
+/** 착지 직후 한 번, 이후 그림이 바뀔 때마다 성장 파동이 퍼진다. */
+const LANDING_PULSE_AT = 0.15;
+/** 마크가 위아래로 떠다니는 폭(마크 단위)과 커서 쪽으로 기우는 폭(px). */
+const FLOAT_UNITS = 0.03;
+const MARK_PARALLAX_PX = 6;
 
 const easeOut = (x: number) => 1 - (1 - Math.min(Math.max(x, 0), 1)) ** 3;
 const easeInOut = (x: number) => {
@@ -29,6 +34,13 @@ function morphAt(t: number): HeroFrame['morph'] {
   const to = (step + 1) % count;
   const progress = (elapsed - step * cycle) / MORPH_SECONDS;
   return progress >= 1 ? [to, to, 0] : [from, to, easeInOut(progress)];
+}
+
+/** 마지막 성장 파동 이후 경과 시간. 착지 파동 전이면 -1. */
+function pulseAt(t: number): number {
+  if (t < FIRST_HOLD_SECONDS) return t >= LANDING_PULSE_AT ? t - LANDING_PULSE_AT : -1;
+  const cycle = MORPH_SECONDS + HOLD_SECONDS;
+  return (t - FIRST_HOLD_SECONDS) % cycle;
 }
 
 interface MarkBox {
@@ -76,23 +88,33 @@ export default function HalftoneHero() {
 
       const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       const finePointer = window.matchMedia('(pointer: fine)').matches;
-      const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+      // x, y: 화면 기준 -1..1 (시차) · px, py: 캔버스 기준 CSS px (점 부풀림) · on: 세기
+      const pointer = { x: 0, y: 0, targetX: 0, targetY: 0, px: 0, py: 0, on: 0, targetOn: 0 };
       let box = measure();
       let raf = 0;
       let last = 0;
       let t = 0;
       let visible = true;
 
-      const draw = () =>
+      const draw = () => {
+        // 착지 순간엔 정확히 마크 상자 위에 있어야 하므로, 떠다님과 기울임은 0 에서 천천히 차오른다.
+        const settle = still ? 0 : easeOut(t / 2);
         renderer.draw({
           time: t,
           // 인트로가 내려앉을 때의 점 간격과 같다 (인트로: 시작 셀 ÷ 시작 단위 × 끝 단위).
           cell: Math.max(box.unit / 21, 3.5),
-          mark: [box.x, box.y, box.unit],
+          mark: [
+            box.x + pointer.x * MARK_PARALLAX_PX * settle,
+            box.y + Math.sin(t * 0.9) * box.unit * FLOAT_UNITS * settle,
+            box.unit,
+          ],
           morph: still ? [0, 0, 0] : morphAt(t),
           pointer: [pointer.x, pointer.y],
           enter: still ? 1 : easeOut(t / ENTER_SECONDS),
+          pulse: still ? -1 : pulseAt(t),
+          cursor: [pointer.px, pointer.py, pointer.on * settle],
         });
+      };
 
       const tick = (now: number) => {
         const dt = Math.min((now - last) / 1000, 0.1);
@@ -103,6 +125,7 @@ export default function HalftoneHero() {
         const follow = 1 - Math.exp(-dt * 3);
         pointer.x += (pointer.targetX - pointer.x) * follow;
         pointer.y += (pointer.targetY - pointer.y) * follow;
+        pointer.on += (pointer.targetOn - pointer.on) * (1 - Math.exp(-dt * 5));
         draw();
         raf = visible && !document.hidden ? requestAnimationFrame(tick) : 0;
       };
@@ -128,13 +151,23 @@ export default function HalftoneHero() {
       const onPointer = (event: PointerEvent) => {
         pointer.targetX = (event.clientX / window.innerWidth) * 2 - 1;
         pointer.targetY = (event.clientY / window.innerHeight) * 2 - 1;
+        const outer = root.getBoundingClientRect();
+        pointer.px = event.clientX - outer.left;
+        pointer.py = event.clientY - outer.top;
+        pointer.targetOn = 1;
+      };
+      const onPointerLeave = () => {
+        pointer.targetOn = 0;
       };
 
       draw();
       resume();
       window.addEventListener('resize', onResize);
       document.addEventListener('visibilitychange', resume);
-      if (finePointer && !still) window.addEventListener('pointermove', onPointer, { passive: true });
+      if (finePointer && !still) {
+        window.addEventListener('pointermove', onPointer, { passive: true });
+        document.documentElement.addEventListener('pointerleave', onPointerLeave);
+      }
 
       return () => {
         cancelAnimationFrame(raf);
@@ -142,6 +175,7 @@ export default function HalftoneHero() {
         window.removeEventListener('resize', onResize);
         document.removeEventListener('visibilitychange', resume);
         window.removeEventListener('pointermove', onPointer);
+        document.documentElement.removeEventListener('pointerleave', onPointerLeave);
         renderer.dispose();
         canvas.remove();
       };
