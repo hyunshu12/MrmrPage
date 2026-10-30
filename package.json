@@ -12,24 +12,29 @@
     "booth:snapshot": "bun scripts/booth-snapshot.ts"
   },
   "dependencies": {
-    "@sanity/client": "^8.9.0",
+    "@sanity/client": "^8.14.1",
     "@sanity/image-url": "^2.1.1",
-    "@tanstack/react-query": "^5.66.11",
-    "next": "16.0.8",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "@tanstack/react-query": "^5.105.0",
+    "next": "16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "vgpu": "0.3.1",
-    "zod": "^3.24.1"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vgpu/wgsl": "0.3.1",
-    "@webgpu/types": "^0.1.72",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "@webgpu/types": "^0.1.74",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "@modelcontextprotocol/server": "^2.3.0",
+    "source-map-js": "^1.2.2",
+    "zod": "^4.6.7"
   }
 }

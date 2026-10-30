@@ -11,14 +11,21 @@
   "dependencies": {
     "@sanity/icons": "^5.2.3",
     "@sanity/locale-ko-kr": "^1.1.40",
-    "@sanity/orderable-document-list": "^2.0.25",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "sanity": "^6.17.0",
-    "styled-components": "^6.1.15"
+    "@sanity/orderable-document-list": "^2.0.28",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "sanity": "^6.21.0",
+    "styled-components": "^6.6.0"
   },
   "devDependencies": {
-    "@types/react": "^19",
-    "typescript": "^5"
+    "@types/react": "^19.3.0",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "dompurify": "^3.4.17",
+    "js-yaml": "^3.14.2",
+    "smol-toml": "^1.6.1",
+    "undici": "^7.30.1",
+    "zod": "^4.6.7"
   }
 }
