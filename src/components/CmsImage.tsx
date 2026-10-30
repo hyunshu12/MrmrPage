@@ -1,81 +1,78 @@
 'use client';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { isSanityImage, sanityImageLoader } from '@/lib/image-loader';
+import { type QueryClient, type QueryKey, useQueryClient } from '@tanstack/react-query';
 import Image, { type ImageProps } from 'next/image';
-import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
-type CmsImageProps = Omit<ImageProps, 'src'> & {
+type CmsImageProps = Omit<ImageProps, 'src' | 'loader'> & {
   src: string | null | undefined;
-  fallback?: ReactNode;
-  /** 로드 실패 시 이 쿼리를 한 번 다시 받아온다. 편집자가 사진을 바꿔 URL 이 달라진 경우를 복구한다. */
-  invalidateQueryKey?: readonly unknown[];
+  /** 주소가 없거나 불러오지 못했을 때 그 자리에 그린다. 카드의 비율 상자를 그대로 채우는 것을 넘긴다. */
+  fallback: ReactNode;
+  /** 로드 실패 시 이 쿼리를 다시 받아온다. 편집자가 사진을 바꿔 URL 이 달라진 경우를 복구한다. */
+  invalidateQueryKey?: QueryKey;
+  /** CSS object-position. Studio 에서 찍은 핫스팟이 들어온다. 없으면 가운데. */
+  position?: string | null;
 };
 
 /**
- * 브랜드 톤(muruk-green-lightest, #e6eee5)으로 채운 8x8 단색 PNG blur.
- *
- * AppBootGate가 splash 동안 각 surface의 정확한 next/image 변환 URL을 미리 받아두므로
- * 대부분의 경우 마운트 즉시 브라우저 캐시 hit이지만, 다음 잔여 케이스에서는 한 프레임의
- * 회색 플래시가 발생할 수 있다:
- *   - splash와 탭 진입 사이에 미디어쿼리 breakpoint/DPR 경계를 넘는 리사이즈가 일어나
- *     예측한 width와 실제 요청 width가 어긋나는 경우(1회 재요청)
- *   - 데이터 timeout 등으로 일부 콘텐츠 이미지가 프리로드되지 못한 경우(진짜 cold miss)
- * placeholder='blur'는 이 모든 경우에 bg-gray-200 대신 브랜드 blur를 즉시 그려
- * 회색 플래시를 구조적으로 불가능하게 만든다(예측 정확도와 무관한 직교 보장).
- *
- * 원본이 원격(Sanity CDN) URL이라 Next가 blur를 자동 생성할 수 없으므로
- * 정적 blurDataURL을 직접 제공한다. svg가 아닌 raster(PNG) data URL이라
- * dangerouslyAllowSVG 없이도 안전하게 렌더된다. img-src에 data: 가 이미 허용돼 있다.
+ * 로드 전에 bg-gray-200 대신 먼저 그리는 옅은 초록(#e6eee5) 8x8 PNG blur.
+ * 원격 이미지라 Next 가 blur 를 만들어 주지 못해 직접 넘긴다. img-src 에 data: 가 허용돼 있다.
  */
 const FALLBACK_BLUR_DATA_URL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAIAAABLbSncAAAAEUlEQVR4nGN49u4pVsQwtCQAFgSuQV1cocQAAAAASUVORK5CYII=';
 
+/**
+ * 같은 쿼리의 복구 재조회는 한 번에 하나만 보낸다.
+ * 여러 장이 한꺼번에 실패해도 이미 받아오는 중이면 건너뛰고, 진행 중인 요청을 취소·재시작하지 않는다.
+ */
+function recoverQuery(queryClient: QueryClient, queryKey: QueryKey) {
+  if (queryClient.isFetching({ queryKey }) > 0) return;
+  void queryClient.invalidateQueries({ queryKey }, { cancelRefetch: false });
+}
+
 export default function CmsImage({
   src,
-  fallback = null,
+  fallback,
   invalidateQueryKey,
+  position,
   alt,
   loading,
   priority,
   placeholder,
   blurDataURL,
+  style,
   ...rest
 }: CmsImageProps) {
   const queryClient = useQueryClient();
-  const [errored, setErrored] = useState(false);
-  const recoveryAttemptedRef = useRef(false);
+  // 실패한 주소. 재조회로 주소가 바뀌면 이 값과 달라지므로 새 주소를 다시 그려 본다.
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: src change is the intended trigger to reset error state
-  useEffect(() => {
-    setErrored(false);
-    recoveryAttemptedRef.current = false;
-  }, [src]);
-
-  if (!src || errored) {
+  if (!src || src === failedSrc) {
     return <>{fallback}</>;
   }
 
-  // AppBootGate가 splash 동안 모든 콘텐츠 이미지의 next/image 변환 URL을 미리 받아놓으므로,
-  // 컴포넌트가 마운트되는 시점엔 브라우저 캐시 hit이 가능하다. lazy loading은 캐시 hit을 지연시키므로
-  // 기본을 eager로 두어 splash가 끝나는 즉시 이미지가 보이도록 한다. priority가 명시되면 그쪽이 우선.
-  const effectiveLoading = priority ? undefined : (loading ?? 'eager');
+  // CMS 이미지는 모두 첫 화면 아래(히어로 다음 섹션부터)에 있어 기본은 lazy 다. 브라우저는 화면에 닿기
+  // 한참 전(수백~수천 px)부터 받기 시작하고, AppBootGate 가 한가할 때 같은 URL(같은 srcset·sizes)로 받아 두면
+  // 캐시에서 바로 나온다. 멤버 22명을 한꺼번에 받지 않아 휴대폰 데이터도 아낀다. priority 가 있으면 그쪽을 따른다.
+  const effectiveLoading = priority ? undefined : (loading ?? 'lazy');
 
   return (
     <Image
       src={src}
       alt={alt}
+      // Sanity 이미지는 Sanity CDN 이 줄인다(/_next/image 를 거치지 않는다). 부스 모드의 로컬 이미지는 기본 로더.
+      loader={isSanityImage(src) ? sanityImageLoader : undefined}
       loading={effectiveLoading}
       priority={priority}
       placeholder={placeholder ?? 'blur'}
       blurDataURL={blurDataURL ?? FALLBACK_BLUR_DATA_URL}
+      style={position ? { ...style, objectPosition: position } : style}
       {...rest}
       onError={() => {
-        if (invalidateQueryKey && !recoveryAttemptedRef.current) {
-          recoveryAttemptedRef.current = true;
-          void queryClient.invalidateQueries({ queryKey: invalidateQueryKey });
-          return;
-        }
-        setErrored(true);
+        // 깨진 이미지와 alt 글자 대신 대체 상자를 보여준다.
+        setFailedSrc(src);
+        if (invalidateQueryKey) recoverQuery(queryClient, invalidateQueryKey);
       }}
     />
   );

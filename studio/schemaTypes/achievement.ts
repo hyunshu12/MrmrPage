@@ -1,6 +1,7 @@
 import { StarIcon } from '@sanity/icons/Star';
 import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineField, defineType } from 'sanity';
+import { checkYear } from './tabValues';
 
 export const achievement = defineType({
   name: 'achievement',
@@ -29,8 +30,19 @@ export const achievement = defineType({
     defineField({
       name: 'year',
       title: '연도',
-      description: '비워두면 날짜의 연도를 씁니다. 업적 페이지의 연도 탭이 이 값으로 나뉩니다.',
+      description:
+        '네 자리 숫자로만 씁니다. 예: 2025. 비워두면 날짜의 연도를 씁니다. 업적 페이지의 연도 탭이 이 값으로 나뉩니다.',
       type: 'string',
+      placeholder: '2025',
+      validation: (rule) => [
+        rule.custom(checkYear),
+        // 둘 다 없으면 '기타' 탭으로 간다. 일부러 그럴 수도 있어 발행은 막지 않는다.
+        rule
+          .custom((year, context) =>
+            year || context.document?.date ? true : "연도나 날짜가 없으면 업적 페이지의 '기타' 탭에 들어갑니다.",
+          )
+          .warning(),
+      ],
     }),
     defineField({
       name: 'team',
@@ -48,6 +60,8 @@ export const achievement = defineType({
     defineField({
       name: 'thumbnail',
       title: '대표 사진',
+      description:
+        '업적 카드와 홈 화면에 16:10 가로 비율로 잘려 나옵니다. 연필 아이콘을 눌러 핫스팟을 꼭 보여야 할 곳(사람·상장 등)에 맞춰 두면 그 부분이 보이게 잘립니다.',
       type: 'image',
       options: { hotspot: true },
     }),

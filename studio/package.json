@@ -12,6 +12,7 @@
     "@sanity/icons": "^5.2.3",
     "@sanity/locale-ko-kr": "^1.1.40",
     "@sanity/orderable-document-list": "^2.0.28",
+    "lexorank": "^1.0.5",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "sanity": "^6.21.0",

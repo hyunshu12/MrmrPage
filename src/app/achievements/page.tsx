@@ -1,47 +1,25 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
+import FilterTabs, { useTabGroups } from '@/components/common/FilterTabs';
+import ImagePlaceholder from '@/components/common/ImagePlaceholder';
+import QueryState from '@/components/common/QueryState';
+import { achievementYearOf, compareYearKeys } from '@/components/common/tab-keys';
 import { achievementsQueryKey, useAchievements } from '@/hooks/useApi';
 import { ARCHIVE_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
+import { IMAGE_QUALITY } from '@/lib/image-loader';
+import { SURFACE_SIZES } from '@/lib/image-sizes';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
-
-function parseYear(value: string): number | null {
-  const match = value.match(/(\d{4})/);
-  if (!match) return null;
-  const year = Number(match[1]);
-  return Number.isFinite(year) ? year : null;
-}
 
 export default function AchievementsPage() {
   const achievementsQuery = useAchievements();
-  const achievements = achievementsQuery.data ?? [];
-  const error = achievementsQuery.isError;
-
-  // 연도별 그룹핑
-  const { yearKeys, achievementsByYear } = useMemo(() => {
-    const byYear: Record<string, typeof achievements> = {};
-    for (const a of achievements) {
-      const key = a.year?.trim() || a.date?.split('-')[0]?.trim() || '기타';
-      if (!byYear[key]) byYear[key] = [];
-      byYear[key].push(a);
-    }
-    const keys = Object.keys(byYear).sort((a, b) => {
-      if (a === '기타') return 1;
-      if (b === '기타') return -1;
-      const ay = parseYear(a);
-      const by = parseYear(b);
-      if (ay !== null && by !== null) return by - ay;
-      if (ay !== null) return -1;
-      if (by !== null) return 1;
-      return b.localeCompare(a, 'ko');
-    });
-    return { yearKeys: keys, achievementsByYear: byYear };
-  }, [achievements]);
-
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const activeYear = selectedYear ?? yearKeys[0] ?? null;
-  const filteredAchievements = activeYear ? (achievementsByYear[activeYear] ?? []) : [];
+  // 연도별 그룹핑과 선택한 연도 탭
+  const {
+    keys: yearKeys,
+    active: activeYear,
+    select,
+    activeItems,
+  } = useTabGroups(achievementsQuery.data, achievementYearOf, compareYearKeys);
 
   return (
     <div className="min-h-screen bg-gradient-achievements">
@@ -58,8 +36,8 @@ export default function AchievementsPage() {
           alt="업적 소개 대표 이미지"
           fill
           priority
-          sizes="100vw"
-          quality={75}
+          sizes={SURFACE_SIZES.hero}
+          quality={IMAGE_QUALITY}
           className="object-cover object-center"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
@@ -91,75 +69,52 @@ export default function AchievementsPage() {
         </a>
       </section>
 
-      <div id="achievements-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
+      {/* scroll-mt: lg 아래는 pt-14 가 고정 헤더보다 얕아 #앵커로 오면 탭이 헤더에 가려진다. lg(스냅 구간)는 pt-28 로 충분해 0. */}
+      <div
+        id="achievements-content"
+        className="snap-section mx-auto max-w-7xl scroll-mt-12 px-4 pb-20 pt-14 sm:px-6 lg:scroll-mt-0 lg:pt-28">
         {/* 연도 탭 */}
-        {yearKeys.length > 0 && (
-          <div className="mb-12 flex flex-wrap gap-2.5 pb-2 sm:gap-3">
-            {yearKeys.map((year) => {
-              const isActive = year === activeYear;
-              return (
-                <button
-                  key={year}
-                  type="button"
-                  onClick={() => setSelectedYear(year)}
-                  className={`whitespace-nowrap rounded-btn border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out sm:px-5 sm:py-2.5 sm:text-base ${
-                    isActive
-                      ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
-                      : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-                  }`}>
-                  {year}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        <FilterTabs label="업적 연도" keys={yearKeys} active={activeYear} onSelect={select} className="mb-12" />
 
-        {/* 에러 */}
-        {error && (
-          <div className="mb-6 rounded-card bg-red-50/80 border border-red-200 p-4 text-red-700">
-            <p>데이터를 불러오는데 실패했습니다.</p>
-          </div>
-        )}
-
-        {/* 빈 상태 */}
-        {achievements.length === 0 && !error && !achievementsQuery.isLoading && (
-          <div className="rounded-card bg-muruk-card-bg p-12 text-center text-muruk-green-muted">
-            등록된 업적이 없습니다.
-          </div>
-        )}
+        {/* 불러오는 중·실패·빈 상태 */}
+        <QueryState query={achievementsQuery} emptyText="등록된 업적이 없습니다." />
 
         {/* 업적 카드 그리드 */}
-        {filteredAchievements.length > 0 && (
+        {activeItems.length > 0 && (
           <div
             key={activeYear ?? 'all'}
             className="reveal-up grid gap-8 sm:grid-cols-2 sm:gap-10 lg:grid-cols-3 lg:gap-12">
-            {filteredAchievements.map((achievement) => (
+            {activeItems.map((achievement) => (
               <div
                 key={achievement.id}
                 className="content-visibility-auto group flex flex-col overflow-hidden rounded-[20px] border border-muruk-green-primary bg-white shadow-md transition-all hover:-translate-y-1 hover:shadow-xl">
-                {/* 썸네일 이미지 */}
-                <div className="aspect-[2/1] w-full shrink-0 overflow-hidden bg-gray-200">
-                  {achievement.thumbnailUrl ? (
-                    <CmsImage
-                      src={achievement.thumbnailUrl}
-                      alt={achievement.name}
-                      width={800}
-                      height={400}
-                      sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                      invalidateQueryKey={achievementsQueryKey}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/30">
-                      <span className="text-5xl text-muruk-green-muted/30">🏆</span>
-                    </div>
-                  )}
+                {/* 썸네일 이미지 (16:10) */}
+                <div className="aspect-[16/10] w-full shrink-0 overflow-hidden bg-gray-200">
+                  <CmsImage
+                    src={achievement.thumbnailUrl}
+                    alt={achievement.name}
+                    width={800}
+                    height={500}
+                    sizes={SURFACE_SIZES.achievements}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    position={achievement.thumbnailPosition}
+                    invalidateQueryKey={achievementsQueryKey}
+                    fallback={
+                      <ImagePlaceholder emoji="🏆" className="bg-muruk-green-lightest/30 text-muruk-green-muted/30" />
+                    }
+                  />
                 </div>
 
                 {/* 정보 영역 */}
                 <div className="flex flex-1 border-t border-muruk-green-primary bg-white p-4 sm:p-6">
-                  <div className="flex flex-1 items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
+                  {/* 수상명은 길이 제한이 없다(예: '최은옥 교육부 차관'). 제목 칸이 basis(10rem)보다 좁아지면
+                      수상명이 제목 위 한 줄로 내려간다. 짧으면 지금처럼 제목 오른쪽.
+                      row-reverse 라 DOM 순서(수상명 → 제목)대로 읽히고, 한 줄일 때는 수상명이 오른쪽에 선다. */}
+                  <div className="flex flex-1 flex-row-reverse flex-wrap items-start justify-end gap-x-3 gap-y-2">
+                    {achievement.award && (
+                      <span className="max-w-full text-2xl font-bold text-muruk-green-award">{achievement.award}</span>
+                    )}
+                    <div className="min-w-0 flex-1 basis-40">
                       <h2 className="text-balance-safe text-base font-semibold leading-snug text-gray-900">
                         {achievement.name}
                       </h2>
@@ -173,9 +128,6 @@ export default function AchievementsPage() {
                         {achievement.date && <p>{achievement.date}</p>}
                       </div>
                     </div>
-                    {achievement.award && (
-                      <span className="shrink-0 text-2xl font-bold text-muruk-green-award">{achievement.award}</span>
-                    )}
                   </div>
                 </div>
               </div>

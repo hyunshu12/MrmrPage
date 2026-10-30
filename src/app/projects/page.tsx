@@ -1,47 +1,25 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
+import FilterTabs, { useTabGroups } from '@/components/common/FilterTabs';
+import ImagePlaceholder from '@/components/common/ImagePlaceholder';
+import QueryState from '@/components/common/QueryState';
+import { compareYearKeys, projectYearOf } from '@/components/common/tab-keys';
 import { projectsQueryKey, useProjects } from '@/hooks/useApi';
 import { PROJECT_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
+import { IMAGE_QUALITY } from '@/lib/image-loader';
+import { SURFACE_SIZES } from '@/lib/image-sizes';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
-
-function parseYear(value: string): number | null {
-  const match = value.match(/(\d{4})/);
-  if (!match) return null;
-  const year = Number(match[1]);
-  return Number.isFinite(year) ? year : null;
-}
 
 export default function ProjectsPage() {
   const projectsQuery = useProjects();
-  const projects = projectsQuery.data ?? [];
-  const error = projectsQuery.isError;
-
-  // 연도별 그룹핑
-  const { yearKeys, projectsByYear } = useMemo(() => {
-    const byYear: Record<string, typeof projects> = {};
-    for (const p of projects) {
-      const key = p.year?.trim() || '기타';
-      if (!byYear[key]) byYear[key] = [];
-      byYear[key].push(p);
-    }
-    const keys = Object.keys(byYear).sort((a, b) => {
-      if (a === '기타') return 1;
-      if (b === '기타') return -1;
-      const ay = parseYear(a);
-      const by = parseYear(b);
-      if (ay !== null && by !== null) return by - ay;
-      if (ay !== null) return -1;
-      if (by !== null) return 1;
-      return b.localeCompare(a, 'ko');
-    });
-    return { yearKeys: keys, projectsByYear: byYear };
-  }, [projects]);
-
-  const [selectedYear, setSelectedYear] = useState<string | null>(null);
-  const activeYear = selectedYear ?? yearKeys[0] ?? null;
-  const filteredProjects = activeYear ? (projectsByYear[activeYear] ?? []) : [];
+  // 연도별 그룹핑과 선택한 연도 탭
+  const {
+    keys: yearKeys,
+    active: activeYear,
+    select,
+    activeItems,
+  } = useTabGroups(projectsQuery.data, projectYearOf, compareYearKeys);
 
   return (
     <div className="min-h-screen bg-gradient-projects">
@@ -58,8 +36,8 @@ export default function ProjectsPage() {
           alt="프로젝트 소개 대표 이미지"
           fill
           priority
-          sizes="100vw"
-          quality={75}
+          sizes={SURFACE_SIZES.hero}
+          quality={IMAGE_QUALITY}
           className="scale-[1.12] object-cover object-center"
           style={{ objectPosition: 'calc(50% - 48px) center' }}
         />
@@ -92,74 +70,44 @@ export default function ProjectsPage() {
         </a>
       </section>
 
-      <div id="projects-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
+      {/* scroll-mt: lg 아래는 pt-14 가 고정 헤더보다 얕아 #앵커로 오면 탭이 헤더에 가려진다. lg(스냅 구간)는 pt-28 로 충분해 0. */}
+      <div
+        id="projects-content"
+        className="snap-section mx-auto max-w-7xl scroll-mt-12 px-4 pb-20 pt-14 sm:px-6 lg:scroll-mt-0 lg:pt-28">
         {/* 연도 탭 */}
-        {yearKeys.length > 0 && (
-          <div className="mb-12 flex justify-start">
-            <div className="flex flex-wrap gap-2.5 pb-2 sm:gap-3">
-              {yearKeys.map((year) => {
-                const isActive = year === activeYear;
-                return (
-                  <button
-                    key={year}
-                    type="button"
-                    onClick={() => setSelectedYear(year)}
-                    className={`whitespace-nowrap rounded-btn border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out sm:px-5 sm:py-2.5 sm:text-base ${
-                      isActive
-                        ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
-                        : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-                    }`}>
-                    {year}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+        <FilterTabs label="프로젝트 연도" keys={yearKeys} active={activeYear} onSelect={select} className="mb-12" />
 
-        {/* 에러 */}
-        {error && (
-          <div className="mb-6 rounded-card bg-red-50/80 border border-red-200 p-4 text-red-700">
-            <p>데이터를 불러오는데 실패했습니다.</p>
-          </div>
-        )}
-
-        {/* 빈 상태 */}
-        {projects.length === 0 && !error && !projectsQuery.isLoading && (
-          <div className="rounded-card bg-muruk-card-bg p-12 text-center text-muruk-green-muted">
-            등록된 프로젝트가 없습니다.
-          </div>
-        )}
+        {/* 불러오는 중·실패·빈 상태 */}
+        <QueryState query={projectsQuery} emptyText="등록된 프로젝트가 없습니다." />
 
         {/* 프로젝트 카드 그리드 */}
-        {filteredProjects.length > 0 && (
+        {activeItems.length > 0 && (
           <div key={activeYear ?? 'all'} className="reveal-up grid gap-6 sm:grid-cols-2 sm:gap-8">
-            {filteredProjects.map((project) => (
+            {activeItems.map((project) => (
               <div
                 key={project.id}
                 className="content-visibility-auto group flex flex-col overflow-hidden rounded-card bg-muruk-card-bg shadow-md transition-all hover:-translate-y-1 hover:shadow-xl sm:flex-row">
                 <div className="w-full shrink-0 overflow-hidden bg-muruk-green-lightest/30 sm:w-2/5">
-                  {project.logoUrl ? (
-                    <CmsImage
-                      src={project.logoUrl}
-                      alt={project.name}
-                      width={600}
-                      height={600}
-                      sizes="(min-width: 640px) 40vw, 100vw"
-                      className="h-full w-full rounded-[30px] object-cover p-4 sm:rounded-[53px]"
-                      invalidateQueryKey={projectsQueryKey}
-                    />
-                  ) : (
-                    <div className="flex h-full min-h-[200px] w-full items-center justify-center">
-                      <span className="text-5xl text-muruk-green-muted/30">🌱</span>
-                    </div>
-                  )}
+                  <CmsImage
+                    src={project.logoUrl}
+                    alt={project.name}
+                    width={600}
+                    height={600}
+                    sizes={SURFACE_SIZES.projects}
+                    className="h-full w-full rounded-[30px] object-cover p-4 sm:rounded-[53px]"
+                    // sm~xl 에서는 칸이 세로로 늘어나 좌우가 잘린다. Studio 핫스팟 쪽을 남긴다.
+                    position={project.logoPosition}
+                    invalidateQueryKey={projectsQueryKey}
+                    // 로고와 같은 1:1 상자. sm 이상에서는 글 높이에 맞춰 늘어난다.
+                    fallback={<ImagePlaceholder emoji="🌱" className="aspect-square text-muruk-green-muted/30" />}
+                  />
                 </div>
 
                 <div className="flex flex-1 flex-col justify-center p-5 sm:p-6">
                   <h2 className="text-xl font-semibold text-muruk-green-text sm:text-2xl">{project.name}</h2>
                   {project.description && (
-                    <p className="text-balance-safe mt-3 text-sm leading-relaxed text-muruk-green-muted sm:text-base">
+                    // Studio 의 여러 줄 입력이라 줄바꿈을 살린다.
+                    <p className="text-balance-safe mt-3 whitespace-pre-line text-sm leading-relaxed text-muruk-green-text/90 sm:text-base">
                       {project.description}
                     </p>
                   )}

@@ -1,6 +1,5 @@
 'use client';
 
-import { QueriesObserver } from '@tanstack/react-query';
 import { useState } from 'react';
 
 const faqs = [
@@ -44,7 +43,7 @@ export default function FaqPage() {
       <section className="relative px-4 pt-24 text-center sm:pt-32">
         <div className="float-slower pointer-events-none absolute left-[8%] top-28 h-24 w-24 rounded-full bg-muruk-green-light/30 blur-2xl" />
         <div className="drift-slow pointer-events-none absolute right-[10%] top-36 h-28 w-28 rounded-full bg-muruk-green-medium/20 blur-2xl" />
-        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-primary">FAQ</p>
+        <p className="reveal-up text-sm font-semibold tracking-[0.2em] text-muruk-green-darker">FAQ</p>
         <h1 className="reveal-up delay-1 mt-4 text-3xl font-bold text-muruk-green-darker sm:text-4xl lg:text-5xl">
           자주 묻는 질문
         </h1>
@@ -57,24 +56,36 @@ export default function FaqPage() {
         <div className="space-y-4">
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index;
+            const questionId = `faq-question-${index}`;
+            const answerId = `faq-answer-${index}`;
             return (
               <article
                 key={faq.question}
                 className="overflow-hidden rounded-3xl border border-muruk-green-border/35 bg-white/90 shadow-sm backdrop-blur-sm">
-                <button
-                  type="button"
-                  onClick={() => setOpenIndex(isOpen ? -1 : index)}
-                  aria-expanded={isOpen}
-                  className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-muruk-card-bg/70 sm:gap-4 sm:px-6 sm:py-5">
-                  <h2 className="text-balance-safe text-base font-semibold text-muruk-green-darker sm:text-lg md:text-xl">
-                    {faq.question}
-                  </h2>
-                  <span className="text-xl leading-none text-muruk-green-primary sm:text-2xl">
-                    {isOpen ? '−' : '+'}
-                  </span>
-                </button>
+                {/* 버튼을 제목 안에 둔다. 버튼 안에 넣은 제목은 보조기기에서 제목으로 잡히지 않는다. */}
+                <h2 className="text-balance-safe text-base font-semibold text-muruk-green-darker sm:text-lg md:text-xl">
+                  <button
+                    type="button"
+                    id={questionId}
+                    onClick={() => setOpenIndex(isOpen ? -1 : index)}
+                    aria-expanded={isOpen}
+                    aria-controls={answerId}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left transition-colors hover:bg-muruk-card-bg/70 sm:gap-4 sm:px-6 sm:py-5">
+                    <span>{faq.question}</span>
+                    {/* 제목의 굵기(font-semibold)를 물려받지 않게 원래 굵기로 둔다. */}
+                    <span
+                      aria-hidden="true"
+                      className="text-xl font-normal leading-none text-muruk-green-primary sm:text-2xl">
+                      {isOpen ? '−' : '+'}
+                    </span>
+                  </button>
+                </h2>
 
-                <div
+                {/* 접힌 답변은 inert 로 보조기기·포커스에서 뺀다. 높이 애니메이션은 그대로 둔다. */}
+                <section
+                  id={answerId}
+                  aria-labelledby={questionId}
+                  inert={!isOpen}
                   className={`grid overflow-hidden transition-all duration-500 ease-out ${
                     isOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-90'
                   }`}>
@@ -88,7 +99,7 @@ export default function FaqPage() {
                       </p>
                     </div>
                   </div>
-                </div>
+                </section>
               </article>
             );
           })}

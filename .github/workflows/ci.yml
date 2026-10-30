@@ -1,0 +1,23 @@
+# main 에 푸시하면 Vercel 이 곧바로 운영에 배포한다. next build 는 Biome 린트를 돌리지 않으므로
+# 린트와 타입 검사를 여기서 먼저 확인한다.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.9
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bunx tsc --noEmit

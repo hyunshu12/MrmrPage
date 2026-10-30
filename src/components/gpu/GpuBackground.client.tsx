@@ -1,5 +1,6 @@
 'use client';
 
+import { afterIntro } from '@/components/intro/intro-flag';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
 import { useEffect, useRef, useState } from 'react';
 import type { SceneHandle } from './scene';
@@ -27,6 +28,9 @@ export default function GpuBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useScrollProgress();
   const [dismissed, setDismissed] = useState(false);
+  /** 캔버스가 보이는지(투명도 > 0). 씬이 뒤늦게 떠도 이 값으로 시작한다. */
+  const shownRef = useRef(false);
+  const sceneRef = useRef<SceneHandle | null>(null);
 
   /**
    * 씬의 시작과 정리를 한 줄로 세우는 체인.
@@ -49,42 +53,54 @@ export default function GpuBackground() {
 
     let handle: SceneHandle | null = null;
     let cancelled = false;
+    let started: Promise<void> | null = null;
 
     const coarse = window.matchMedia('(pointer: coarse)').matches;
 
-    const started = chainRef.current
-      .catch(() => undefined)
-      .then(async () => {
-        if (cancelled) return;
-        // WebGPU 가 있는 브라우저만 vgpu 청크를 내려받는다.
-        const { startScene } = await import('./scene');
-        if (cancelled) return;
+    const start = () => {
+      started = chainRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          if (cancelled) return;
+          // WebGPU 가 있는 브라우저만 vgpu 청크를 내려받는다.
+          const { startScene } = await import('./scene');
+          if (cancelled) return;
 
-        const scene = await startScene(canvas, () => stateRef.current, {
-          fps: coarse ? MOBILE_FPS : DESKTOP_FPS,
-          intensity: 1,
-          onFatal: () => setDismissed(true),
+          const scene = await startScene(canvas, () => stateRef.current, {
+            fps: coarse ? MOBILE_FPS : DESKTOP_FPS,
+            intensity: 1,
+            onFatal: () => setDismissed(true),
+          });
+
+          if (cancelled) {
+            scene.stop();
+            return;
+          }
+          handle = scene;
+          sceneRef.current = scene;
+          // 씬은 멈춘 채로 시작한다. 그사이 스크롤해서 이미 보이는 상태면 바로 그린다.
+          scene.setShown(shownRef.current);
+        })
+        .catch(() => {
+          // 어댑터 없음(VGPU-RING1-UNSUPPORTED), 셰이더 컴파일 실패 등.
+          // 조용히 접는다. 배경은 CSS 그라디언트가 이미 그리고 있다.
+          // 이미 정리된 뒤의 실패는 되살릴 필요가 없다.
+          if (!cancelled) setDismissed(true);
         });
+      chainRef.current = started;
+    };
 
-        if (cancelled) {
-          scene.stop();
-          return;
-        }
-        handle = scene;
-      })
-      .catch(() => {
-        // 어댑터 없음(VGPU-RING1-UNSUPPORTED), 셰이더 컴파일 실패 등.
-        // 조용히 접는다. 배경은 CSS 그라디언트가 이미 그리고 있다.
-        // 이미 정리된 뒤의 실패는 되살릴 필요가 없다.
-        if (!cancelled) setDismissed(true);
-      });
-
-    chainRef.current = started;
+    // 인트로가 끝난 뒤에 시작한다. 어댑터·파이프라인 준비가 인트로 프레임과 겹치면 모션이 끊긴다.
+    // 홈 첫 화면에서는 어차피 투명하므로 늦게 시작해도 보이는 차이가 없다.
+    const cancelStart = afterIntro(start);
 
     return () => {
       cancelled = true;
+      cancelStart();
+      if (!started) return;
       // 시작이 끝난 뒤에 멈춘다. 이 정리가 끝나야 다음 씬이 시작할 수 있다.
       chainRef.current = started.then(() => {
+        if (sceneRef.current === handle) sceneRef.current = null;
         handle?.stop();
         handle = null;
       });
@@ -92,13 +108,18 @@ export default function GpuBackground() {
   }, [dismissed, stateRef]);
 
   // 첫 화면은 하프톤 히어로(components/hero)가 차지한다. 두 그림이 겹치면 산만하므로
-  // 배경은 히어로를 지나면서 서서히 나타난다.
+  // 배경은 히어로를 지나면서 서서히 나타난다. 투명한 동안은 그려도 보이지 않으므로 씬을 멈춘다.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (dismissed || !canvas) return;
     const apply = () => {
       const t = (window.scrollY - window.innerHeight * 0.25) / (window.innerHeight * 0.5);
-      canvas.style.opacity = String(Math.min(Math.max(t, 0), 1));
+      const opacity = Math.min(Math.max(t, 0), 1);
+      canvas.style.opacity = String(opacity);
+      const shown = opacity > 0;
+      if (shown === shownRef.current) return;
+      shownRef.current = shown;
+      sceneRef.current?.setShown(shown);
     };
     apply();
     window.addEventListener('scroll', apply, { passive: true });

@@ -23,6 +23,7 @@ export interface SceneState {
 }
 
 export interface SceneOptions {
+  /** 목표 프레임률. 적응형 화질이 느린 프레임을 가리는 기준도 이 값이다. */
   readonly fps: number;
   readonly intensity: number;
   /** 디바이스 로스트 등 복구 불가 상황. 호출자가 캔버스를 걷어내고 CSS 폴백으로 돌아간다. */
@@ -30,6 +31,11 @@ export interface SceneOptions {
 }
 
 export interface SceneHandle {
+  /**
+   * 캔버스가 보이는지(투명도 > 0). 안 보이는 동안은 프레임 루프를 세운다.
+   * 씬은 멈춘 채로 시작하므로, 보이는 상태라면 만든 직후에 한 번 알려야 그리기 시작한다.
+   */
+  setShown(shown: boolean): void;
   stop(): void;
 }
 
@@ -44,6 +50,13 @@ const POINTER_FOLLOW_PER_SECOND = 2;
 const POINTER_FADE_PER_SECOND = 1.2;
 /** 탭 전환 등으로 프레임이 크게 벌어졌을 때 보간이 튀지 않도록 잘라낸다. */
 const MAX_DELTA_SECONDS = 0.1;
+
+/**
+ * vgpu 는 직전에 그린 rAF 시각과의 차이가 1000/fps ms 이상일 때만 그린다. rAF 시각은 0.1~1ms 단위로 잘려서
+ * 60Hz 화면의 16.6ms 간격이 16.667ms 문턱에 걸리면 한 프레임씩 건너뛴다(60 → 실효 약 40fps, 30 → 20fps).
+ * 문턱을 목표 간격보다 조금 짧게 잡아 목표 프레임률이 그대로 나오게 한다.
+ */
+const FPS_CAP_HEADROOM = 1.07;
 
 /** 필드 패스의 축소 배율. 4면 픽셀 수가 1/16 이 된다. */
 const FIELD_DIVISOR = 4;
@@ -132,13 +145,15 @@ export async function startScene(
   }
 
   let stopped = false;
+  let lost = false;
+  let shown = false;
   let loop: { stop(): void } | null = null;
   let fps = opts.fps;
   let downgraded = false;
   let slowStreak = 0;
 
   const startLoop = () => {
-    if (stopped || loop) return;
+    if (stopped || lost || loop) return;
     const budget = 1 / fps;
 
     loop = frameLoop(
@@ -162,7 +177,7 @@ export async function startScene(
               queueMicrotask(() => {
                 if (stopped) return;
                 stopLoop();
-                startLoop();
+                syncLoop();
               });
             }
           }
@@ -194,7 +209,7 @@ export async function startScene(
         frame.pass(fieldTarget, fieldEffect);
         frame.pass(view, growthEffect);
       },
-      { fps },
+      { fps: fps * FPS_CAP_HEADROOM },
     );
   };
 
@@ -203,16 +218,26 @@ export async function startScene(
     loop = null;
   };
 
-  // 백그라운드 탭에서는 렌더를 완전히 멈춘다.
-  const handleVisibility = () => {
-    if (document.hidden) stopLoop();
-    else startLoop();
+  // 보이지 않는 동안(히어로 위에서 투명도 0 · 백그라운드 탭)은 렌더를 완전히 멈춘다.
+  // vgpu 시계는 벽시계를 따라가므로, 다시 그릴 때도 쉬지 않고 돌던 것과 같은 장면이 나온다.
+  const syncLoop = () => {
+    if (shown && !document.hidden) startLoop();
+    else stopLoop();
   };
-  document.addEventListener('visibilitychange', handleVisibility);
+  document.addEventListener('visibilitychange', syncLoop);
 
   const releaseError = gpu.onError(() => {
-    // 디바이스 로스트를 포함한 모든 GPU 에러는 복구를 시도하지 않는다.
+    // 검증 에러 같은 GPU 에러는 복구를 시도하지 않는다.
     // 조용히 접고 CSS 그라디언트로 돌아가는 편이 깨진 화면보다 낫다.
+    opts.onFatal();
+  });
+
+  // 디바이스 로스트는 onError 로 오지 않는다. vgpu 는 상태만 바꿔 두고 다음 프레임을 만들 때 rAF 안에서 던지므로,
+  // 직접 지켜보다가 루프를 세우고 같은 경로로 접는다. stop() 의 dispose 로 스스로 끊은 경우('destroyed')는 무시한다.
+  void gpu.gpu.lost.then((info: { reason: string }) => {
+    if (stopped || info.reason === 'destroyed') return;
+    lost = true;
+    stopLoop();
     opts.onFatal();
   });
 
@@ -224,19 +249,16 @@ export async function startScene(
     // 진짜 문제라면 gpu.onError 가 잡는다.
   });
 
-  if (stopped) {
-    gpu.dispose();
-    return { stop() {} };
-  }
-
-  startLoop();
-
   return {
+    setShown(next) {
+      shown = next;
+      syncLoop();
+    },
     stop() {
       if (stopped) return;
       stopped = true;
       stopLoop();
-      document.removeEventListener('visibilitychange', handleVisibility);
+      document.removeEventListener('visibilitychange', syncLoop);
       if (finePointer) {
         window.removeEventListener('pointermove', handlePointerMove);
         document.removeEventListener('pointerleave', handlePointerOut);

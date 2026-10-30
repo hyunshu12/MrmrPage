@@ -17,10 +17,12 @@ float easeOut(float x) {
 }
 
 // 살짝 넘쳤다 돌아오는 이징. 잎이 펼쳐질 때 탄력을 준다.
+// 밑(x - 1)이 음수라 pow() 를 쓰면 결과가 정의되지 않는다(일부 GPU 에서 NaN). 곱셈으로 쓴다.
 float easeOutBack(float x) {
   x = clamp(x, 0.0, 1.0);
   float c = 1.4;
-  return 1.0 + (c + 1.0) * pow(x - 1.0, 3.0) + c * pow(x - 1.0, 2.0);
+  float u = x - 1.0;
+  return 1.0 + (c + 1.0) * u * u * u + c * u * u;
 }
 
 vec2 rotate(vec2 v, float a) {
@@ -83,7 +85,10 @@ float leafDist(vec2 p, vec2 base, vec2 tip, float grow, float unfurl, int channe
   vec2 rest = base + rotate((p - base) / grow, -turn);
   float d = sdfAt(rest, 0.0)[channel];
   if (side != 0.0) d = max(d, -side * rest.x);
-  return d * grow;
+  // 잎에서 먼 곳은 텍스처 값이 SDF_RANGE 로 포화돼 있어서, 갓 돋는 잎(grow 가 아주 작음)이면 d * grow 가
+  // AA 폭보다 작아져 화면 전체가 잎으로 칠해진다. 잎은 밑동에서 0.9 안에 있으니 그 원까지의 거리로 하한을 둔다.
+  // 포화되지 않은 값보다는 항상 작아서, 잎 모양 자체는 그대로다.
+  return max(d * grow, length(p - base) - 0.9 * grow);
 }
 
 vec3 hexGradient(float y) {

@@ -1,11 +1,14 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
+import ImagePlaceholder from '@/components/common/ImagePlaceholder';
+import { LoadError } from '@/components/common/QueryState';
 import HalftoneHero from '@/components/hero/HalftoneHero.client';
 import SectionDots from '@/components/home/SectionDots';
 import { useActiveSection } from '@/hooks/useActiveSection';
 import { achievementsQueryKey, projectsQueryKey, useAchievements, useProjects } from '@/hooks/useApi';
 import { useBoothAutoScroll } from '@/hooks/useBoothAutoScroll';
+import { SURFACE_SIZES } from '@/lib/image-sizes';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRef } from 'react';
@@ -21,10 +24,10 @@ export default function HomePage() {
   const achievementsQuery = useAchievements();
   const sectionRefs = useRef<Array<HTMLElement | null>>([]);
 
-  const projects = projectsQuery.data ?? [];
-  const achievements = achievementsQuery.data ?? [];
-  const featuredProject = projects[0] ?? null;
-  const featuredAchievement = achievements[0] ?? null;
+  const featuredProject = projectsQuery.data?.[0] ?? null;
+  const featuredAchievement = achievementsQuery.data?.[0] ?? null;
+  // 개수는 받아 온 데이터가 있을 때만 말한다. 실패했을 때 '0개' 라고 쓰지 않는다.
+  const projectCount = projectsQuery.data?.length ?? 0;
 
   // 섹션 스냅 자체는 CSS(.snap-section)가 맡는다. ref 는 인디케이터와 부스 자동 순환이 쓴다.
   const activeSection = useActiveSection(sectionRefs);
@@ -32,7 +35,9 @@ export default function HomePage() {
   useBoothAutoScroll(sectionRefs);
 
   const scrollToSection = (index: number) => {
-    sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // 움직임 줄이기 설정이면 미끄러지지 않고 바로 옮긴다.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    sectionRefs.current[index]?.scrollIntoView({ behavior: reduceMotion ? 'instant' : 'smooth', block: 'start' });
   };
 
   return (
@@ -53,7 +58,7 @@ export default function HomePage() {
           <a
             href="#home-intro"
             aria-label="홈 소개 내용으로 이동"
-            className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-muruk-green-primary/50 transition-opacity hover:opacity-80">
+            className="absolute bottom-10 left-1/2 z-10 -translate-x-1/2 animate-bounce text-muruk-green-primary transition-opacity hover:opacity-80">
             <span className="sr-only">홈 소개 내용으로 이동</span>
             <svg
               aria-hidden="true"
@@ -92,38 +97,45 @@ export default function HomePage() {
           className="snap-section mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 py-16 sm:px-6 sm:py-20">
           <article className="grid w-full items-center gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
             <div className="reveal-up group relative overflow-hidden rounded-card bg-muruk-card-bg shadow-md">
-              {projectsQuery.isLoading ? (
-                <div className="aspect-[16/10]" />
-              ) : featuredProject?.logoUrl ? (
-                <CmsImage
-                  src={featuredProject.logoUrl}
-                  alt={featuredProject.name}
-                  width={1280}
-                  height={800}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                  invalidateQueryKey={projectsQueryKey}
-                  priority
-                />
-              ) : (
-                <div className="flex aspect-[16/10] items-center justify-center bg-muruk-green-lightest/40 text-5xl text-muruk-green-muted/40">
-                  🌱
-                </div>
-              )}
+              {/* 로고는 대개 정사각형이라 16:10 칸에 꽉 채우면 위아래가 잘린다. 여백을 두고 통째로 가운데에 놓는다. */}
+              <div className="aspect-[16/10] bg-muruk-green-lightest/40 p-[8%]">
+                {!projectsQuery.isPending && (
+                  <CmsImage
+                    src={featuredProject?.logoUrl}
+                    alt={featuredProject?.name ?? ''}
+                    width={800}
+                    height={800}
+                    sizes={SURFACE_SIZES.homeProject}
+                    className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.04]"
+                    placeholder="empty"
+                    invalidateQueryKey={projectsQueryKey}
+                    fallback={<ImagePlaceholder emoji="🌱" className="text-muruk-green-muted/40" />}
+                  />
+                )}
+              </div>
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/5 to-transparent" />
             </div>
 
+            {/* 섹션 배경이 그라디언트 아래쪽(연두)이라 작은 글씨는 가장 짙은 초록으로 써야 AA 대비가 나온다. */}
             <div className="reveal-up delay-1">
-              <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">PROJECT</p>
-              <h3 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">프로젝트</h3>
-              {projectsQuery.isLoading ? (
+              <p className="text-sm font-semibold tracking-wide text-muruk-green-deepest">PROJECT</p>
+              <h2 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">프로젝트</h2>
+              {projectsQuery.isPending ? (
                 <div className="mt-6 h-28" />
               ) : (
-                <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-text/90 sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
-                  무럭무럭은 스마트팜을 기반으로 한 {projects.length}개의 프로젝트를 진행하며 농업이 마주한 여러 사회적
-                  문제에 주목해왔습니다. 농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의 가치를 일상 속에서 다시
-                  인식할 수 있도록 노력 하였습니다.
+                <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-deepest sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
+                  무럭무럭은 스마트팜을 기반으로 한 {projectCount > 0 ? `${projectCount}개의 ` : ''}프로젝트를 진행하며
+                  농업이 마주한 여러 사회적 문제에 주목해왔습니다. 농촌의 구조적 한계와 도시와의 거리감을 줄이고, 농업의
+                  가치를 일상 속에서 다시 인식할 수 있도록 노력 하였습니다.
                 </p>
+              )}
+              {projectsQuery.isLoadingError && (
+                <LoadError
+                  className="mt-6 max-w-2xl"
+                  message="프로젝트 정보를 불러오지 못했습니다."
+                  onRetry={() => void projectsQuery.refetch()}
+                  retrying={projectsQuery.isFetching}
+                />
               )}
               <div className="mt-8">
                 <Link
@@ -145,15 +157,23 @@ export default function HomePage() {
           className="snap-section mx-auto flex min-h-[100svh] max-w-7xl items-center px-4 py-16 sm:px-6 sm:py-20">
           <article className="grid w-full items-center gap-8 md:gap-10 lg:grid-cols-2 lg:gap-14">
             <div className="reveal-up delay-1 order-2 lg:order-1">
-              <p className="text-sm font-semibold tracking-wide text-muruk-green-primary">ACHIEVEMENT</p>
-              <h3 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">업적</h3>
-              <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-text/90 sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
+              <p className="text-sm font-semibold tracking-wide text-muruk-green-deepest">ACHIEVEMENT</p>
+              <h2 className="mt-3 text-2xl font-bold text-muruk-green-darker sm:text-3xl lg:text-4xl">업적</h2>
+              <p className="text-balance-safe mt-6 max-w-2xl text-sm leading-7 text-muruk-green-deepest sm:text-base sm:leading-8 md:text-lg md:leading-relaxed">
                 무럭무럭은 기술과 농업을 연결하는 창업 프로젝트에 꾸준히 도전해왔습니다. 2024년 교내 해커톤 1위를 포함한
                 다수의 수상 성과와, 2025 데이터 크리에이터 캠프 최우수상 수상 및 상위권 입상을 통해 기획력과 실행력을
                 인정받았습니다. 이러한 성과는 단순한 수상의 결과가 아니라, 농업의 문제를 기술적 시각으로 재해석하고 그
                 가치를 사회적으로 확장해온 과정의 증거입니다. 무럭무럭은 매년 새로운 도전을 통해 농업과 기술이 함께
                 성장할 수 있는 방향을 모색하며, 아이디어를 실천으로 증명해가고 있습니다.
               </p>
+              {achievementsQuery.isLoadingError && (
+                <LoadError
+                  className="mt-6 max-w-2xl"
+                  message="업적 정보를 불러오지 못했습니다."
+                  onRetry={() => void achievementsQuery.refetch()}
+                  retrying={achievementsQuery.isFetching}
+                />
+              )}
               <div className="mt-8">
                 <Link
                   href="/achievements"
@@ -165,24 +185,23 @@ export default function HomePage() {
             </div>
 
             <div className="reveal-up group order-1 overflow-hidden rounded-card bg-white shadow-md lg:order-2">
-              {achievementsQuery.isLoading ? (
-                <div className="aspect-[16/10]" />
-              ) : featuredAchievement?.thumbnailUrl ? (
-                <CmsImage
-                  src={featuredAchievement.thumbnailUrl}
-                  alt={featuredAchievement.name}
-                  width={1280}
-                  height={800}
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="aspect-[16/10] h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                  invalidateQueryKey={achievementsQueryKey}
-                  priority
-                />
-              ) : (
-                <div className="flex aspect-[16/10] items-center justify-center bg-muruk-green-lightest/30 text-5xl text-muruk-green-muted/40">
-                  🏆
-                </div>
-              )}
+              <div className="aspect-[16/10]">
+                {!achievementsQuery.isPending && (
+                  <CmsImage
+                    src={featuredAchievement?.thumbnailUrl}
+                    alt={featuredAchievement?.name ?? ''}
+                    width={1280}
+                    height={800}
+                    sizes={SURFACE_SIZES.homeAchievement}
+                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    position={featuredAchievement?.thumbnailPosition}
+                    invalidateQueryKey={achievementsQueryKey}
+                    fallback={
+                      <ImagePlaceholder emoji="🏆" className="bg-muruk-green-lightest/30 text-muruk-green-muted/40" />
+                    }
+                  />
+                )}
+              </div>
             </div>
           </article>
         </section>

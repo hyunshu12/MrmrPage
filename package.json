@@ -9,6 +9,7 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
+    "booth:serve": "next dev --turbopack -H 127.0.0.1",
     "booth:snapshot": "bun scripts/booth-snapshot.ts"
   },
   "dependencies": {

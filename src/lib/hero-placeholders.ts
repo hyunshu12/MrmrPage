@@ -4,8 +4,8 @@
  * - dominantColor: 이미지 평균 색을 어둡게 한 값 (이미지 로드 전 section 배경)
  * - blurDataUrl: 24px JPEG quality 35 base64 (이미지 로드 전 즉시 페인트되는 blur)
  *
- * 회색 플레이스홀더 노출 0프레임 보장을 위한 3중 fallback의 1, 2번째 레이어.
- * 3번째는 검은 그라디언트 오버레이가 이미지 onLoad 후 fade-in.
+ * 히어로 사진이 뜨기 전에 빈 화면 대신 비슷한 색과 흐린 사진을 먼저 보여준다.
+ * 그 위의 검은 그라디언트 오버레이는 사진 로드와 상관없이 처음부터 깔려 있다.
  *
  * 재생성 방법 (이미지 교체 시):
  * 1. `sips -s format jpeg -s formatOptions 35 -Z 24 public/{name}Image.png --out /tmp/{name}.jpg`

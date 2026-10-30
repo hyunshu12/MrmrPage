@@ -1,33 +1,11 @@
-@import url("https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap");
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
 @import "tailwindcss";
 
 @config '../../tailwind.config.ts';
 
-:root {
-  /* 무럭무럭 Green Palette */
-  --color-cream: #fffbe2;
-  --color-cream-light: #fffde3;
-  --color-cream-dark: #fff9d2;
-  --color-green-lightest: #e5f0c0;
-  --color-green-light: #a0c9a2;
-  --color-green-medium: #9cb67c;
-  --color-green-sage: #90a470;
-  --color-green-primary: #688a46;
-  --color-green-dark: #62783e;
-  --color-green-darker: #51662f;
-  --color-green-deepest: #394e25;
-  --color-green-text: #4a5a35;
-  --color-green-muted: #7a9a70;
-  --color-green-award: #4d6f2c;
-  --color-green-border: #72805c;
-  --color-card-bg: #fdfaf0;
-  --color-card-light: #fffff8;
-  --color-nav-inactive: #a1a1a1;
-
-  --radius-card: 2rem;
-  --radius-button: 1.875rem;
-}
+/*
+ * 웹폰트는 여기서 @import 하지 않는다(렌더를 막는 직렬 요청이 되고, 빌드에서 빠지기도 했다).
+ * Crimson Text 는 layout.tsx 의 next/font 가 --font-crimson 으로 주고, Pretendard 는 layout.tsx 가 <link> 로 받는다.
+ */
 
 * {
   box-sizing: border-box;
@@ -42,7 +20,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
-  font-family: "Crimson Text", "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-crimson), "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.45;
   word-break: keep-all;
   overflow-wrap: anywhere;
@@ -61,6 +39,26 @@ body {
 .content-visibility-auto {
   content-visibility: auto;
   contain-intrinsic-size: auto 280px;
+}
+
+/* 멤버 카드는 4:5 사진이라 다른 카드보다 길다: 휴대폰 2열 약 310~330px, sm 이상 약 430~730px. */
+.content-visibility-auto.cv-member {
+  contain-intrinsic-size: auto 330px;
+}
+
+@media (min-width: 640px) {
+  .content-visibility-auto.cv-member {
+    contain-intrinsic-size: auto 520px;
+  }
+}
+
+/* Tailwind v4 프리플라이트는 v3 에 있던 버튼 손가락 커서를 뺐다. 링크처럼 눌린다는 신호를 되살린다.
+   base 층이라 cursor-wait 같은 유틸리티가 이긴다. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 }
 
 /*
@@ -143,15 +141,6 @@ body {
   }
 }
 
-@keyframes shineSweep {
-  from {
-    transform: translateX(-130%);
-  }
-  to {
-    transform: translateX(160%);
-  }
-}
-
 .float-slow {
   animation: floatY 8s ease-in-out infinite;
 }
@@ -175,10 +164,6 @@ body {
 
 .delay-2 {
   animation-delay: 240ms;
-}
-
-.delay-3 {
-  animation-delay: 360ms;
 }
 
 /*
@@ -267,46 +252,6 @@ html[data-intro] .boot-splash > * {
   animation-play-state: paused;
 }
 
-.divider-shine {
-  position: relative;
-  overflow: hidden;
-}
-
-.divider-shine::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 40%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: shineSweep 3.4s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes ctaFloat {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
-  }
-}
-
-@keyframes ctaPulse {
-  0%,
-  100% {
-    box-shadow: 0 8px 24px rgba(81, 102, 47, 0.12);
-  }
-  50% {
-    box-shadow: 0 12px 32px rgba(81, 102, 47, 0.2);
-  }
-}
-
-.cta-float {
-  animation: ctaFloat 3.8s ease-in-out infinite, ctaPulse 4.2s ease-in-out infinite;
-  backdrop-filter: blur(8px);
-}
-
 .kakao-shortcut {
   position: relative;
   overflow: hidden;
@@ -365,11 +310,11 @@ html[data-intro] .boot-splash > * {
     animation: none;
   }
 
+  /* animate-bounce: 히어로 아래 스크롤 화살표. 레이어 밖 규칙이라 Tailwind 유틸리티보다 우선한다. */
   .float-slow,
   .float-slower,
   .drift-slow,
-  .cta-float,
-  .divider-shine::after {
+  .animate-bounce {
     animation: none;
   }
 }

@@ -1,6 +1,7 @@
 import { UsersIcon } from '@sanity/icons/Users';
 import { orderRankField, orderRankOrdering } from '@sanity/orderable-document-list';
 import { defineField, defineType } from 'sanity';
+import { checkGeneration } from './tabValues';
 
 export const member = defineType({
   name: 'member',
@@ -18,14 +19,17 @@ export const member = defineType({
     defineField({
       name: 'murukGeneration',
       title: '무럭무럭 기수',
-      description: '예: 3기. 멤버 페이지의 탭이 이 값으로 나뉩니다.',
+      description: "숫자 뒤에 '기'를 붙여 띄어쓰기 없이 씁니다. 예: 3기. 멤버 페이지의 탭이 이 값 그대로 나뉩니다.",
       type: 'string',
-      validation: (rule) => rule.required(),
+      placeholder: '3기',
+      validation: (rule) => rule.required().custom(checkGeneration),
     }),
     defineField({
       name: 'role',
       title: '역할',
-      description: '카드 위쪽 색 띠가 역할에 따라 달라집니다.',
+      // 비어 있어도 된다. 사이트는 역할 글자를 빼고 회색 선만 그린다(getRoleColor).
+      description:
+        '멤버 카드의 이름 아래 짧은 선 색과 역할 이름이 이 값으로 정해집니다. 아직 정해지지 않았으면 비워 두세요. 회색 선만 나옵니다.',
       type: 'string',
       options: {
         list: [
@@ -60,7 +64,8 @@ export const member = defineType({
     defineField({
       name: 'avatar',
       title: '프로필 사진',
-      description: '사진을 올린 뒤 연필 아이콘을 눌러 얼굴 위치(핫스팟)를 찍어두면 카드에서 그 부분이 보입니다.',
+      description:
+        '멤버 카드에 4:5 세로 비율로 잘려 나옵니다. 사진을 올린 뒤 연필 아이콘을 눌러 핫스팟을 얼굴에 맞춰 두면 얼굴이 보이게 잘립니다.',
       type: 'image',
       options: { hotspot: true },
     }),

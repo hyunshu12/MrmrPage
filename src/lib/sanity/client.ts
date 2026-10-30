@@ -12,11 +12,13 @@ export const sanityClient = createClient({
   useCdn: true,
   // 발행된 문서만 읽는다. 편집 중인 초안은 사이트에 나오지 않는다.
   perspective: 'published',
+  // 기본값은 5분이다. Sanity 가 응답하지 않으면 /api 가 그만큼 매달리므로 짧게 끊고 오류로 돌려준다.
+  timeout: 10_000,
 });
 
 const imageBuilder = createImageUrlBuilder(sanityClient);
 
-/** 편집자가 지정한 크롭을 반영한 원본 URL. 리사이즈·포맷 변환은 next/image 가 맡는다. */
+/** 편집자가 지정한 크롭(rect=)을 반영한 원본 URL. 리사이즈·포맷 변환은 Sanity CDN 이 맡는다(lib/image-loader). */
 export function imageUrl(source: SanityImageSource | null | undefined): string | null {
   return source ? imageBuilder.image(source).url() : null;
 }

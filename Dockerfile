@@ -27,8 +27,9 @@ RUN bun install --frozen-lockfile
 # Reuses the installed node_modules from the deps stage, then
 # copies the source and produces the .next build output.
 # No secrets are required at build time (Sanity is read without a token):
-# all /api routes are force-dynamic and every CMS-consuming
-# page is a client component fetching via React Query at runtime.
+# the /api route handlers (no dynamic/revalidate config) are not prerendered and
+# query Sanity per request, and every CMS-consuming page is a client
+# component fetching via React Query at runtime.
 # -------------------------------------------------------------
 FROM ${BUN_IMAGE} AS build
 WORKDIR /app
@@ -47,7 +48,8 @@ RUN bun run build
 # and run `next start` via `bun run start`. node_modules is
 # required so the `next` binary resolves at runtime, and
 # next.config.ts is required so the security headers / CSP /
-# image remotePatterns apply (Bun loads the TS config natively).
+# images config apply (Bun loads the TS config natively).
+# Plain HTTP works: upgrade-insecure-requests is only sent on Vercel.
 # -------------------------------------------------------------
 FROM ${BUN_IMAGE} AS runner
 WORKDIR /app

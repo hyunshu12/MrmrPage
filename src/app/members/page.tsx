@@ -1,14 +1,16 @@
 'use client';
 
+import QueryState from '@/components/common/QueryState';
 import MembersTabs from '@/components/members/MembersTabs.client';
 import { useMembers } from '@/hooks/useApi';
 import { MEMBER_HERO_PLACEHOLDER } from '@/lib/hero-placeholders';
+import { IMAGE_QUALITY } from '@/lib/image-loader';
+import { SURFACE_SIZES } from '@/lib/image-sizes';
 import Image from 'next/image';
 
 export default function MembersPage() {
   const membersQuery = useMembers();
-  const members = membersQuery.data ?? [];
-  const error = membersQuery.isError;
+  const members = membersQuery.data;
 
   return (
     <div className="min-h-screen bg-gradient-members">
@@ -25,8 +27,8 @@ export default function MembersPage() {
           alt="멤버 소개 대표 이미지"
           fill
           priority
-          sizes="100vw"
-          quality={75}
+          sizes={SURFACE_SIZES.hero}
+          quality={IMAGE_QUALITY}
           className="object-cover object-center"
         />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/28 via-black/42 to-black/62" />
@@ -58,23 +60,15 @@ export default function MembersPage() {
         </a>
       </section>
 
-      <div id="members-content" className="snap-section mx-auto max-w-7xl px-4 pb-20 pt-14 sm:px-6 lg:pt-28">
-        {/* 에러 */}
-        {error && (
-          <div className="mb-6 rounded-card bg-red-50/80 border border-red-200 p-4 text-red-700">
-            <p>데이터를 불러오는데 실패했습니다.</p>
-          </div>
-        )}
-
-        {/* 빈 상태 */}
-        {members.length === 0 && !error && !membersQuery.isLoading && (
-          <div className="rounded-card bg-muruk-card-bg p-12 text-center text-muruk-green-muted">
-            등록된 멤버가 없습니다.
-          </div>
-        )}
+      {/* scroll-mt: lg 아래는 pt-14 가 고정 헤더보다 얕아 #앵커로 오면 탭이 헤더에 가려진다. lg(스냅 구간)는 pt-28 로 충분해 0. */}
+      <div
+        id="members-content"
+        className="snap-section mx-auto max-w-7xl scroll-mt-12 px-4 pb-20 pt-14 sm:px-6 lg:scroll-mt-0 lg:pt-28">
+        {/* 불러오는 중·실패·빈 상태 */}
+        <QueryState query={membersQuery} emptyText="등록된 멤버가 없습니다." />
 
         {/* 멤버 탭 */}
-        {members.length > 0 && <MembersTabs members={members} />}
+        {members && members.length > 0 && <MembersTabs members={members} />}
       </div>
     </div>
   );

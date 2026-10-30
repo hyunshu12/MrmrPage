@@ -1,5 +1,6 @@
 'use client';
 
+import { boothDwellSeconds, isBoothMode } from '@/lib/booth';
 import { type MutableRefObject, useEffect, useState } from 'react';
 
 const DEFAULT_DWELL_MS = 5000;
@@ -17,22 +18,21 @@ type SectionRefs = MutableRefObject<Array<HTMLElement | null>>;
  *
  * `?booth=1&dwell=8` 처럼 초 단위로 체류 시간을 조절할 수 있다 (기본 5초).
  *
- * 각 섹션에서 체류 시간만큼 머문 뒤 다음 섹션으로 부드럽게 이동하고,
+ * 각 섹션에서 체류 시간만큼 머문 뒤 다음 섹션으로 부드럽게 이동하고(움직임 줄이기 설정이면 바로 이동),
  * 마지막 섹션 다음에는 맨 위로 돌아가 무한 반복한다.
  * 사용자가 마우스/키보드를 만져도 타이머는 멈추지 않는다.
  */
-export function useBoothAutoScroll(sectionRefs: SectionRefs): boolean {
+export function useBoothAutoScroll(sectionRefs: SectionRefs): void {
   const [enabled, setEnabled] = useState(false);
   const [dwellMs, setDwellMs] = useState(DEFAULT_DWELL_MS);
 
   // 마운트 후 URL 을 읽는다. SSR 과 첫 렌더 결과를 일치시키기 위해 초기값은 항상 false.
+  // 부스 여부와 체류 시간은 페이지를 처음 연 주소로 정해지므로, 다른 페이지에 갔다 돌아와도 같은 박자로 이어진다.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const value = params.get('booth');
-    setEnabled(value !== null && value !== '0' && value !== 'false');
+    setEnabled(isBoothMode());
 
-    const dwellSeconds = Number(params.get('dwell'));
-    if (Number.isFinite(dwellSeconds) && dwellSeconds > 0) {
+    const dwellSeconds = boothDwellSeconds();
+    if (dwellSeconds !== null) {
       setDwellMs(Math.min(Math.max(dwellSeconds * 1000, MIN_DWELL_MS), MAX_DWELL_MS));
     }
   }, []);
@@ -55,11 +55,12 @@ export function useBoothAutoScroll(sectionRefs: SectionRefs): boolean {
       }
 
       index = (index + 1) % sections.length;
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth';
 
       if (index === 0) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior });
       } else {
-        sections[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        sections[index].scrollIntoView({ behavior, block: 'start' });
       }
 
       dwellTimer = window.setTimeout(step, dwellMs + SCROLL_SETTLE_MS);
@@ -74,6 +75,4 @@ export function useBoothAutoScroll(sectionRefs: SectionRefs): boolean {
       if (dwellTimer !== null) window.clearTimeout(dwellTimer);
     };
   }, [enabled, dwellMs, sectionRefs]);
-
-  return enabled;
 }

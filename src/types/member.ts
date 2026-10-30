@@ -9,8 +9,8 @@ export const memberSchema = z.object({
   className: z.string().nullable(),
   statusMessage: z.string().nullable(),
   avatarUrl: z.string().nullable(),
+  // 프로필 사진 핫스팟(CSS object-position). 지정하지 않았으면 null.
   avatarPosition: z.string().nullable(),
-  order: z.number(),
 });
 
 export type Member = z.infer<typeof memberSchema>;

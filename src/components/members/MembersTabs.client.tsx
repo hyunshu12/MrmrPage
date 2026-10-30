@@ -1,149 +1,82 @@
 'use client';
 
 import CmsImage from '@/components/CmsImage';
+import FilterTabs, { useTabGroups } from '@/components/common/FilterTabs';
+import ImagePlaceholder from '@/components/common/ImagePlaceholder';
+import { compareGenerationKeys, memberGenerationOf } from '@/components/common/tab-keys';
 import { membersQueryKey } from '@/hooks/useApi';
 import { getRoleColor } from '@/lib/getRoleColor';
+import { memberPhotoSizes } from '@/lib/image-sizes';
 import type { Member } from '@/types';
-import { useMemo, useState } from 'react';
-
-function parseMurukGen(value: string): number | null {
-  const match = value.match(/(\d+)/);
-  if (!match) return null;
-  const num = Number(match[1]);
-  return Number.isFinite(num) ? num : null;
-}
-
-function sortMurukKeys(a: string, b: string): number {
-  if (a === '미분류') return 1;
-  if (b === '미분류') return -1;
-
-  const an = parseMurukGen(a);
-  const bn = parseMurukGen(b);
-  if (an !== null && bn !== null) return bn - an;
-  if (an !== null) return -1;
-  if (bn !== null) return 1;
-  return b.localeCompare(a, 'ko');
-}
-
-function normalizeAvatarPosition(value: string | null | undefined): string | undefined {
-  if (!value) return undefined;
-  const trimmed = value.trim().toLowerCase();
-
-  // keyword format: "center", "top center", "left top", etc.
-  const keywordPattern = /^(center|top|bottom|left|right)(\s+(center|top|bottom|left|right))?$/;
-  if (keywordPattern.test(trimmed)) return trimmed;
-
-  // percentage format: "50% 20%"
-  const percentPattern = /^(-?\d{1,3})%\s+(-?\d{1,3})%$/;
-  const match = trimmed.match(percentPattern);
-  if (!match) return undefined;
-
-  const x = Math.min(100, Math.max(0, Number(match[1])));
-  const y = Math.min(100, Math.max(0, Number(match[2])));
-  return `${x}% ${y}%`;
-}
 
 export default function MembersTabs({ members }: { members: Member[] }) {
-  const { membersByMuruk, murukKeys } = useMemo(() => {
-    const by: Record<string, Member[]> = {};
-    for (const member of members) {
-      const key = member.murukGeneration?.trim() || '미분류';
-      if (!by[key]) {
-        by[key] = [];
-      }
-      by[key].push(member);
-    }
+  // 기본 선택은 가장 최근 기수이고, 데이터가 바뀌면(새 기수 추가 등) 그대로 따라간다.
+  const { keys, active, select, activeItems } = useTabGroups(members, memberGenerationOf, compareGenerationKeys);
 
-    const keys = Object.keys(by).sort(sortMurukKeys);
-    return { membersByMuruk: by, murukKeys: keys };
-  }, [members]);
-
-  const [selectedKey, setSelectedKey] = useState<string>(() => murukKeys[0] ?? '미분류');
-  const selectedMembers = membersByMuruk[selectedKey] ?? [];
-
-  if (murukKeys.length === 0) {
+  if (keys.length === 0) {
     return null;
   }
 
   return (
     <div className="space-y-10">
       {/* 기수 탭 */}
-      <div className="flex flex-wrap gap-2.5 pb-2 sm:gap-3">
-        {murukKeys.map((key) => {
-          const isActive = key === selectedKey;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => setSelectedKey(key)}
-              className={`whitespace-nowrap rounded-btn border px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out sm:px-5 sm:py-2.5 sm:text-base ${
-                isActive
-                  ? 'translate-y-[-1px] scale-[1.02] border-muruk-green-border bg-muruk-green-sage text-white shadow-md'
-                  : 'border-transparent bg-muruk-card-bg text-muruk-green-muted hover:-translate-y-0.5 hover:bg-muruk-green-sage/20 hover:shadow-sm'
-              }`}>
-              {key}
-            </button>
-          );
-        })}
-      </div>
+      <FilterTabs label="기수" keys={keys} active={active} onSelect={select} />
 
-      {/* 멤버 카드 그리드 */}
-      <div key={selectedKey} className="reveal-up grid gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-4">
-        {selectedMembers.map((member) => {
-          const lineColor = getRoleColor(member.role);
-          const avatarPosition = normalizeAvatarPosition(member.avatarPosition);
-          return (
-            <div
-              key={member.id}
-              className="content-visibility-auto group overflow-hidden rounded-card bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1">
-              {/* 프로필 이미지 영역 */}
-              <div className="aspect-[312/275] w-full overflow-hidden bg-gray-200">
-                {member.avatarUrl ? (
-                  <CmsImage
-                    src={member.avatarUrl}
-                    alt={member.name}
-                    width={624}
-                    height={550}
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                    style={avatarPosition ? { objectPosition: avatarPosition } : undefined}
-                    invalidateQueryKey={membersQueryKey}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muruk-green-lightest/40">
-                    <span className="text-5xl text-muruk-green-muted/30">🌿</span>
-                  </div>
+      <h2 className="sr-only">{active} 멤버</h2>
+
+      {/* 멤버 카드 그리드: 4:5 사진이라 휴대폰에서 한 열이면 카드 하나가 화면을 거의 채운다. 휴대폰부터 2열. */}
+      <div key={active} className="reveal-up grid grid-cols-2 gap-3 sm:gap-8 lg:grid-cols-4">
+        {activeItems.map((member) => (
+          <div
+            key={member.id}
+            className="content-visibility-auto cv-member group overflow-hidden rounded-2xl bg-white shadow-md transition-all hover:shadow-xl hover:-translate-y-1 sm:rounded-card">
+            {/* 프로필 이미지 영역 (4:5 세로) */}
+            <div className="aspect-[4/5] w-full overflow-hidden bg-gray-200">
+              <CmsImage
+                src={member.avatarUrl}
+                alt={member.name}
+                width={640}
+                height={800}
+                sizes={memberPhotoSizes(member.avatarUrl)}
+                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                position={member.avatarPosition}
+                invalidateQueryKey={membersQueryKey}
+                fallback={
+                  <ImagePlaceholder emoji="🌿" className="bg-muruk-green-lightest/40 text-muruk-green-muted/30" />
+                }
+              />
+            </div>
+
+            {/* 정보 영역 */}
+            <div className="px-3 py-4 text-center sm:p-5">
+              {/* 이름 */}
+              <h3 className="text-balance-safe text-lg font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
+
+              {/* 역할 색상 라인 */}
+              <div
+                className="mx-auto mt-2 h-[2px] w-10 rounded-full sm:w-12"
+                style={{ backgroundColor: getRoleColor(member.role) }}
+              />
+
+              {/* 역할 & 학과 & 상태 메시지 */}
+              <div className="mt-2.5 space-y-0.5 text-xs text-gray-600 sm:mt-3 sm:text-sm">
+                {member.role && <p>{member.role}</p>}
+                {(member.schoolGeneration || member.className) && (
+                  <p>
+                    {member.schoolGeneration ?? ''}
+                    {member.schoolGeneration && member.className ? ' ' : ''}
+                    {member.className ?? ''}
+                  </p>
+                )}
+                {member.statusMessage && (
+                  <p className="text-balance-safe break-words whitespace-pre-line leading-relaxed text-gray-500">
+                    {member.statusMessage}
+                  </p>
                 )}
               </div>
-
-              {/* 정보 영역 */}
-              <div className="p-4 text-center sm:p-5">
-                {/* 이름 */}
-                <h3 className="text-balance-safe text-xl font-semibold text-gray-900 sm:text-2xl">{member.name}</h3>
-
-                {/* 역할 색상 라인 */}
-                <div className="mx-auto mt-2 h-[2px] w-12 rounded-full" style={{ backgroundColor: lineColor }} />
-
-                {/* 역할 & 학과 & 상태 메시지 */}
-                <div className="mt-3 space-y-0.5 text-xs text-gray-600 sm:text-sm">
-                  {member.role && <p>{member.role}</p>}
-                  {(member.schoolGeneration || member.className) && (
-                    <p>
-                      {member.schoolGeneration ?? ''}
-                      {member.schoolGeneration && member.className ? ' ' : ''}
-                      {member.className ?? ''}
-                    </p>
-                  )}
-                  {member.statusMessage && (
-                    <p className="text-balance-safe break-words whitespace-pre-line leading-relaxed text-gray-500">
-                      {member.statusMessage}
-                    </p>
-                  )}
-                </div>
-              </div>
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );

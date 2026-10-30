@@ -241,11 +241,14 @@ void main() {
     float dInner = innerShape(mix(uMorph.x, uMorph.y, useNext), q);
     float innerCov = smoothstep(h, -h, dInner);
     // 경계를 막 넘은 셀은 잠깐 작게 찍혀 반짝인다.
-    float flip = 1.0 - 0.6 * exp(-pow((uMorph.z - threshold) * 14.0, 2.0)) * step(0.001, uMorph.z) * step(uMorph.z, 0.999);
+    // 가우시안은 pow() 대신 곱셈으로 제곱한다 (밑이 음수면 pow 결과가 정의되지 않는다).
+    float fz = (uMorph.z - threshold) * 14.0;
+    float flip = 1.0 - 0.6 * exp(-fz * fz) * step(0.001, uMorph.z) * step(uMorph.z, 0.999);
     float breathe = 0.92 + 0.08 * sin(uTime * 1.6 - length(q) * 5.0);
     // 빛 결: 몇 초마다 대각선 띠가 육각형을 스치며 점을 살짝 부풀리고 밝힌다.
     float diag = (q.x + q.y) * 0.7071;
-    float sheen = exp(-pow((diag - (fract(uTime / 6.0) * 3.6 - 1.8)) / 0.22, 2.0));
+    float sz = (diag - (fract(uTime / 6.0) * 3.6 - 1.8)) / 0.22;
+    float sheen = exp(-sz * sz);
     // 커서 둘레의 점이 부푼다. 최대 크기를 넘으면 이웃 점과 맞닿아 뭉친다.
     vec2 toCursor = (cc - uCursor.xy) / (uMark.z * 0.42);
     float hover = uCursor.z * exp(-dot(toCursor, toCursor));
@@ -286,7 +289,8 @@ void main() {
     // 성장 파동: 그림이 바뀔 때마다 로고에서 은은한 점 고리가 퍼진다 (인트로의 씨앗 파동을 잇는다).
     if (uPulse >= 0.0) {
       float ringR = uMark.z * (1.05 + uPulse * 2.6);
-      float ring = exp(-pow((length(cc - uMark.xy) - ringR) / (uMark.z * 0.15), 2.0)) * exp(-uPulse * 1.1);
+      float rz = (length(cc - uMark.xy) - ringR) / (uMark.z * 0.15);
+      float ring = exp(-rz * rz) * exp(-uPulse * 1.1);
       if (ring * 0.28 > v) {
         v = ring * 0.28;
         ink = INK_SOFT;

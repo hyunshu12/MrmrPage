@@ -98,8 +98,9 @@ void main() {
   vec2 seedPx = uMark.xy + SEED * uMark.z;
   float dist = length(cc - seedPx);
   // 씨앗에서 퍼지는 파동. 폭과 속도를 마크 크기에 맞춰 화면 크기와 무관하게 같은 인상을 준다.
-  float rip = uRipple < 0.0 ? 0.0
-    : exp(-pow((dist - uRipple * uMark.z * 5.0) / (uMark.z * 0.28), 2.0)) * exp(-uRipple * 1.3);
+  // 가우시안은 pow() 대신 곱셈으로 제곱한다 (밑이 음수면 pow 결과가 정의되지 않는다).
+  float rz = (dist - uRipple * uMark.z * 5.0) / (uMark.z * 0.28);
+  float rip = uRipple < 0.0 ? 0.0 : exp(-rz * rz) * exp(-uRipple * 1.3);
   float vignette = 1.0 - 0.55 * smoothstep(0.25, 0.75, length((px - vp * 0.5) / max(vp.x, vp.y)));
   float vIdle = uIdle * (0.07 + 0.06 * twinkle) * vignette + rip * 0.35;
   float idleAlpha = uIdle * 0.22 + rip * 0.4;
@@ -110,7 +111,9 @@ void main() {
   float keep = uWipe <= 0.0 ? 1.0 : smoothstep(uWipe - band, uWipe + band, length(cc - uMark.xy));
 
   vec3 bg = mix(BG_GLOW, BG, smoothstep(0.0, 0.7, length((px - uMark.xy) / max(vp.x, vp.y))));
-  float rb = keep * uCell * 0.72;
+  // 와이프 밖(keep = 1)의 배경 점은 AA 램프까지 셀 모서리(0.7071 셀)를 덮어야 한다. 0.72 셀로는 모서리 픽셀이
+  // 반투명해져 아래 페이지가 방충망처럼 비친다(DPR 1 에서 뚜렷). 와이프 띠 바깥 끝에서 원래 크기로 이어 준다.
+  float rb = mix(keep * uCell * 0.72, uCell * 0.7072 + aa, smoothstep(0.98, 1.0, keep));
   float bgMask = smoothstep(rb + aa, rb - aa, length(lp));
 
   bool showMark = vMark > 0.02;
